@@ -54,7 +54,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@android:color/holo_blue_dark"
-            android:drawableStart="@drawable/ic_male"
             android:text="Male" />
 
         <Button
@@ -63,7 +62,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@android:color/holo_blue_dark"
-            android:drawableStart="@drawable/ic_female"
             android:text="Female" />
     </LinearLayout>
 
