@@ -1,179 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@android:color/white">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F5E6F0">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello new user!"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:textColor="#333333" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to the app"
+        android:textSize="14sp"
+        android:layout_gravity="center"
+        android:textColor="#666666" />
+
+    <EditText
+        android:id="@+id/idName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/white"
+        android:hint="Full Name"
+        android:padding="12dp"
+        android:textColorHint="#999999" />
+
+    <EditText
+        android:id="@+id/idEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/white"
+        android:hint="Email"
+        android:padding="12dp"
+        android:textColorHint="#999999" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
-        tools:context=".RegisterActivity">
+        android:layout_marginTop="16dp">
 
-        <!-- Welcome section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chào người dùng mới!"
-            android:textSize="24sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chào mừng bạn đến với ứng dụng"
-            android:textSize="16sp"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Name and Email fields -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Họ Tên"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nhập họ tên"
-            android:inputType="textPersonName"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nhập email"
-            android:inputType="textEmailAddress"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Gender selection -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Giới tính"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="8dp"/>
-
-        <RadioGroup
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nam"
-                android:layout_marginEnd="16dp"/>
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nữ"/>
-        </RadioGroup>
-
-        <!-- Date of birth -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ngày sinh"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="dd/mm/yyyy"
-            android:inputType="date"
-            android:text="04/12/2022"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Password fields -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mật Khẩu"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nhập mật khẩu"
-            android:inputType="textPassword"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Xác nhận mật khẩu"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nhập lại mật khẩu"
-            android:inputType="textPassword"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Register button -->
         <Button
-            android:layout_width="match_parent"
+            android:id="@+id/btnNam"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Đăng ký"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
+            android:layout_weight="1"
             android:backgroundTint="@android:color/holo_blue_dark"
-            android:layout_marginBottom="16dp"/>
+            android:drawableStart="@drawable/ic_male"
+            android:text="Male" />
 
-        <!-- Login link -->
-        <TextView
-            android:layout_width="wrap_content"
+        <Button
+            android:id="@+id/btnNu"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Đã có tài khoản? Đăng nhập ngay"
-            android:textSize="14sp"
-            android:layout_gravity="center_horizontal">
-            <annotation
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Đăng nhập ngay"
-                android:textColor="@android:color/holo_blue_dark"
-                android:textStyle="bold"/>
-        </TextView>
-
+            android:layout_weight="1"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:drawableStart="@drawable/ic_female"
+            android:text="Female" />
     </LinearLayout>
-</ScrollView>
+
+    <EditText
+        android:id="@+id/idDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/white"
+        android:drawableRight="@android:drawable/ic_menu_my_calendar"
+        android:hint="04/12/2022"
+        android:padding="12dp"
+        android:textColorHint="#999999" />
+
+    <EditText
+        android:id="@+id/idPass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/white"
+        android:drawableRight="@android:drawable/ic_menu_view"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:padding="12dp"
+        android:textColorHint="#999999" />
+
+    <EditText
+        android:id="@+id/idRepass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/white"
+        android:drawableRight="@android:drawable/ic_menu_view"
+        android:hint="Confirm Password"
+        android:inputType="textPassword"
+        android:padding="12dp"
+        android:textColorHint="#999999" />
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Register"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:backgroundTint="@android:color/holo_blue_dark" />
+
+    <TextView
+        android:id="@+id/tvLoginNow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:text="Already have an account? Login now"
+        android:textColor="#1E90FF"
+        android:textSize="14sp" />
+</LinearLayout>
