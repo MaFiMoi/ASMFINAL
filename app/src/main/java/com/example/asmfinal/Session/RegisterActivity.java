@@ -27,26 +27,24 @@ public class RegisterActivity extends AppCompatActivity {
     private Button selectedGenderButton = null; // Biến này sẽ giữ nút giới tính hiện đang được chọn
 
     private void handleGenderButtonClick(Button clickedButton) {
-        // 1. Đặt lại trạng thái của nút đã chọn trước đó (nếu có)
         if (selectedGenderButton != null && selectedGenderButton != clickedButton) {
-            // Đặt lại màu nền về màu mặc định (ví dụ: một drawable selector màu xám)
             selectedGenderButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.holo_blue_dark));
-            // Đặt lại màu chữ về màu mặc định (ví dụ: một color selector màu đen)
             selectedGenderButton.setTextColor(ContextCompat.getColorStateList(this, R.color.white));
         }
 
-        // 2. Cập nhật nút được chọn hiện tại
         selectedGenderButton = clickedButton;
 
-        // 3. Đặt màu sắc cho nút hiện tại được chọn (tùy thuộc vào ID của nút)
-        if (clickedButton.getId() == R.id.btnNu) { // Nếu là nút Nữ
+        if (clickedButton.getId() == R.id.btnNu) {
+            selectedGender = "Female"; // ✅ Thêm dòng này
             selectedGenderButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.pink_color));
-            selectedGenderButton.setTextColor(ContextCompat.getColorStateList(this, R.color.white)); // Sử dụng selector cho nữ
-        } else if (clickedButton.getId() == R.id.btnNam) { // Nếu là nút Nam
+        } else if (clickedButton.getId() == R.id.btnNam) {
+            selectedGender = "Male"; // ✅ Thêm dòng này
             selectedGenderButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.green_light));
-            selectedGenderButton.setTextColor(ContextCompat.getColorStateList(this, R.color.white)); // Sử dụng selector cho nam
         }
+
+        selectedGenderButton.setTextColor(ContextCompat.getColorStateList(this, R.color.white));
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
