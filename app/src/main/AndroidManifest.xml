@@ -22,9 +22,12 @@
             </intent-filter>
         </activity>
 
+
         <!-- Không cần intent-filter cho LoginActivity và MainActivity -->
         <activity android:name=".Session.LoginActivity" />
-        <activity android:name=".MainActivity" />
+        <activity android:name=".Session.MainActivity" />
+        <activity android:name=".Session.ChartActivity" android:exported="true">
+        </activity>
 
     </application>
 
