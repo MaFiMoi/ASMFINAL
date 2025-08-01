@@ -31,6 +31,7 @@ android {
     }
 }
 
+
 dependencies {
 
     implementation(libs.appcompat)
@@ -40,9 +41,11 @@ dependencies {
     implementation(libs.room.runtime.android)
     implementation(libs.play.services.location)
     implementation(libs.recyclerview)
+    implementation(libs.fragment)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("com.google.android.material:material:1.12.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

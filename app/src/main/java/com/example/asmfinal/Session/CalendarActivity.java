@@ -9,14 +9,15 @@ import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.asmfinal.DatabaseHelper;
+import com.example.asmfinal.database.DatabaseHelper;
 import com.example.asmfinal.R;
+import com.example.asmfinal.model.Transaction;
 import com.example.asmfinal.model.TransactionType;
+import com.example.asmfinal.adapter.TransactionAdapter;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -47,7 +48,7 @@ public class CalendarActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_calendar);
+        setContentView(R.layout.calendar_activity);
 
         initViews();
         initData();
@@ -64,6 +65,7 @@ public class CalendarActivity extends AppCompatActivity {
         tvTotal = findViewById(R.id.tvTotal);
         btnPreviousMonth = findViewById(R.id.btnPreviousMonth);
         btnNextMonth = findViewById(R.id.btnNextMonth);
+        // This ID now exists in the corrected XML
         recyclerViewTransactions = findViewById(R.id.recyclerViewTransactions);
 
         btnPreviousMonth.setOnClickListener(v -> {
@@ -83,7 +85,8 @@ public class CalendarActivity extends AppCompatActivity {
 
         currentCalendar = Calendar.getInstance();
         currencyFormat = new DecimalFormat("#,###");
-        monthYearFormat = new SimpleDateFormat("'Month' MM 'Year' yyyy", Locale.US); // Using US locale for English format
+        // Using US locale for English format
+        monthYearFormat = new SimpleDateFormat("MMMM yyyy", Locale.US);
 
         allTransactions = new ArrayList<>();
         selectedDayTransactions = new ArrayList<>();
@@ -94,7 +97,8 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        transactionAdapter = new TransactionAdapter(selectedDayTransactions);
+        // The corrected XML uses recyclerViewTransactions, so this is correct.
+        transactionAdapter = new TransactionAdapter(this, selectedDayTransactions);
         recyclerViewTransactions.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewTransactions.setAdapter(transactionAdapter);
     }
@@ -120,7 +124,7 @@ public class CalendarActivity extends AppCompatActivity {
         int firstDayOfWeek = tempCal.get(Calendar.DAY_OF_WEEK);
         int daysInMonth = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-        // Adjust for Monday start
+        // Adjust for Monday start (Monday=1, Sunday=7 in ISO 8601)
         int startDay = (firstDayOfWeek == Calendar.SUNDAY) ? 6 : firstDayOfWeek - 2;
 
         // Add empty cells for days before month starts
@@ -174,19 +178,26 @@ public class CalendarActivity extends AppCompatActivity {
         if (totalIncome > 0 || totalExpense > 0) {
             if (totalIncome > 0) {
                 indicatorIncome.setVisibility(View.VISIBLE);
+            } else {
+                indicatorIncome.setVisibility(View.GONE);
             }
             if (totalExpense > 0) {
                 indicatorExpense.setVisibility(View.VISIBLE);
+            } else {
+                indicatorExpense.setVisibility(View.GONE);
             }
 
             // Show net amount
             double netAmount = totalIncome - totalExpense;
-            if (Math.abs(netAmount) >= 1000) { // Only show if significant amount
+            // You can adjust this threshold
+            if (Math.abs(netAmount) >= 1) {
                 tvAmount.setText(formatCurrency(netAmount));
                 tvAmount.setVisibility(View.VISIBLE);
                 tvAmount.setTextColor(netAmount >= 0 ?
                         getResources().getColor(R.color.green_positive) :
                         getResources().getColor(R.color.red_negative));
+            } else {
+                tvAmount.setVisibility(View.GONE);
             }
         }
 
@@ -229,16 +240,18 @@ public class CalendarActivity extends AppCompatActivity {
         selectedDayTransactions.clear();
         selectedDayTransactions.addAll(getTransactionsForDay(day));
         transactionAdapter.notifyDataSetChanged();
+        // You might want to scroll to the top of the RecyclerView here
+        // recyclerViewTransactions.scrollToPosition(0);
     }
 
     private void highlightSelectedDay(View selectedDayView) {
         // Remove highlight from all days
         for (int i = 0; i < calendarGrid.getChildCount(); i++) {
             View child = calendarGrid.getChildAt(i);
-            child.setSelected(false);
+            child.setBackgroundResource(R.drawable.calendar_day_background); // Assuming a default background
         }
         // Highlight selected day
-        selectedDayView.setSelected(true);
+        selectedDayView.setBackgroundResource(R.drawable.calendar_day_selected_background); // Assuming a selected background
     }
 
     private void updateMonthlySummary() {
@@ -259,7 +272,7 @@ public class CalendarActivity extends AppCompatActivity {
         tvTotalExpense.setText("-" + formatCurrency(totalExpense) + " VND");
         tvTotal.setText(formatCurrency(netTotal) + " VND");
 
-        // Set colors
+        // Set colors (Ensure these color resources exist in colors.xml)
         tvTotalIncome.setTextColor(getResources().getColor(R.color.green_positive));
         tvTotalExpense.setTextColor(getResources().getColor(R.color.red_negative));
         tvTotal.setTextColor(netTotal >= 0 ?
@@ -284,17 +297,16 @@ public class CalendarActivity extends AppCompatActivity {
         monthStart.set(Calendar.HOUR_OF_DAY, 0);
         monthStart.set(Calendar.MINUTE, 0);
         monthStart.set(Calendar.SECOND, 0);
+        monthStart.set(Calendar.MILLISECOND, 0);
 
         Calendar monthEnd = (Calendar) monthStart.clone();
         monthEnd.add(Calendar.MONTH, 1);
-        monthEnd.add(Calendar.SECOND, -1);
+        monthEnd.add(Calendar.MILLISECOND, -1);
 
-        SimpleDateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        String selection = DatabaseHelper.COLUMN_TRANSACTION_DATE + " BETWEEN ? AND ?";
+        String selection = DatabaseHelper.COLUMN_EXPENSE_DATE + " BETWEEN ? AND ?";
         String[] selectionArgs = {
-                dbDateFormat.format(monthStart.getTime()),
-                dbDateFormat.format(monthEnd.getTime())
+                String.valueOf(monthStart.getTimeInMillis()),
+                String.valueOf(monthEnd.getTimeInMillis())
         };
 
         Cursor cursor = db.query(
@@ -307,26 +319,35 @@ public class CalendarActivity extends AppCompatActivity {
                 null
         );
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                // Assuming your column names and types match
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_ID));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_NOTE));
-                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_AMOUNT));
-                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_DATE));
-                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_CATEGORY_ID));
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                // Get column indices once for efficiency
+                int idIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_EXPENSE_ID);
+                int descriptionIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_EXPENSE_NOTE);
+                int amountIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_EXPENSE_AMOUNT);
+                int timestampIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_EXPENSE_DATE);
+                int categoryIdIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_EXPENSE_CATEGORY_ID);
 
-                // You'll need logic to fetch the category name and icon based on categoryId
-                // For now, we'll use a placeholder
-                String categoryName = "Default";
-                int categoryIcon = R.drawable.ic_category_default; // You need to have this drawable
+                do {
+                    // Check if indices are valid before getting data
+                    if (idIndex != -1 && descriptionIndex != -1 && amountIndex != -1 && timestampIndex != -1 && categoryIdIndex != -1) {
+                        // int id = cursor.getInt(idIndex); // Not used
+                        String description = cursor.getString(descriptionIndex);
+                        double amount = cursor.getDouble(amountIndex);
+                        long timestamp = cursor.getLong(timestampIndex);
+                        // int categoryId = cursor.getInt(categoryIdIndex); // Not used
 
-                TransactionType transactionType = (amount > 0) ? TransactionType.INCOME : TransactionType.EXPENSE;
+                        // You'll need logic to fetch the category name and icon based on categoryId
+                        // For now, we'll use a placeholder
+                        // String categoryName = "Default"; // Not used
+                        int categoryIcon = R.drawable.ic_category_default; // Make sure this drawable exists
 
-                // Create a Transaction object and add it to the list
-                transactions.add(new Transaction(description, amount, new Date(timestamp), transactionType, categoryIcon));
+                        TransactionType transactionType = (amount > 0) ? TransactionType.INCOME : TransactionType.EXPENSE;
 
-            } while (cursor.moveToNext());
+                        transactions.add(new Transaction(description, amount, new Date(timestamp), transactionType, categoryIcon));
+                    }
+                } while (cursor.moveToNext());
+            }
             cursor.close();
         }
         db.close();
