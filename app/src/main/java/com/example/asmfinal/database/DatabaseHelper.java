@@ -29,12 +29,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_GENDER = "gender";
 
     // Expenses table
-    private static final String TABLE_EXPENSE = "expenses";
-    private static final String COLUMN_EXPENSE_ID = "id";
-    private static final String COLUMN_TITLE = "title";
-    private static final String COLUMN_AMOUNT = "amount";
-    private static final String COLUMN_DATE = "date";
-    private static final String COLUMN_CATEGORY = "category";
+    public static final String TABLE_EXPENSE = "expenses";
+    public static final String COLUMN_EXPENSE_ID = "id";
+    public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_AMOUNT = "amount";
+    public static final String COLUMN_DATE = "date";
+    public static final String COLUMN_CATEGORY = "category";
 
     private static final String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_USER + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -239,4 +239,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(TABLE_EXPENSE, COLUMN_EXPENSE_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
     }
+    /**
+     * Lấy tổng chi tiêu theo danh mục trong một khoảng thời gian cụ thể.
+     *
+     * @param startDate Ngày bắt đầu (định dạng YYYY-MM-DD).
+     * @param endDate   Ngày kết thúc (định dạng YYYY-MM-DD).
+     * @return Map chứa tên danh mục và tổng chi tiêu.
+     */
+    public java.util.Map<String, Float> getSpendingByCategory(String startDate, String endDate) {
+        java.util.Map<String, Float> spendingMap = new java.util.HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT " + COLUMN_CATEGORY + ", SUM(" + COLUMN_AMOUNT + ") " +
+                "FROM " + TABLE_EXPENSE +
+                " WHERE " + COLUMN_DATE + " BETWEEN ? AND ?" +
+                " GROUP BY " + COLUMN_CATEGORY;
+
+        Cursor cursor = db.rawQuery(query, new String[]{startDate, endDate});
+
+        if (cursor.moveToFirst()) {
+            do {
+                String category = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY));
+                float totalAmount = cursor.getFloat(cursor.getColumnIndexOrThrow("SUM(" + COLUMN_AMOUNT + ")"));
+                spendingMap.put(category, totalAmount);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return spendingMap;
+    }
+
 }

@@ -8,5 +8,5 @@ public enum TransactionType {
     SHOPPING,
     ENTERTAINMENT,
     HEALTHCARE,
-    OTHER
+    EXPENSE, OTHER
 }

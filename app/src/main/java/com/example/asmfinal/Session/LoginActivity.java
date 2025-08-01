@@ -9,7 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.asmfinal.Session.MainActivity; // Đảm bảo đã import MainActivity
 import com.example.asmfinal.R;
 import com.example.asmfinal.database.DatabaseHelper;
 
@@ -46,13 +45,11 @@ public class LoginActivity extends AppCompatActivity {
                 if (isAuthenticated) {
                     Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
 
-                    // --- Bắt đầu thay đổi ---
-                    // Chuyển sang MainActivity sau khi đăng nhập thành công
+                    // Correctly launch MainActivity
+                    // The MainActivity is responsible for loading the HomeFragment by default.
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
-                    finish(); // Kết thúc LoginActivity
-                    // --- Kết thúc thay đổi ---
-
+                    finish(); // Close LoginActivity
                 } else {
                     Toast.makeText(this, "Email hoặc mật khẩu không hợp lệ", Toast.LENGTH_SHORT).show();
                 }

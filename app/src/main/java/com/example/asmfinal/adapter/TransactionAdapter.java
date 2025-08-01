@@ -1,10 +1,12 @@
 package com.example.asmfinal.adapter;
 
+import android.content.Context; // Import Context
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,10 +19,13 @@ import java.util.List;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
+    private final Context context; // Thêm trường Context
     private List<Transaction> transactionList;
     private DecimalFormat currencyFormat;
 
-    public TransactionAdapter(List<Transaction> transactionList) {
+    // Sửa constructor để nhận cả Context và List
+    public TransactionAdapter(Context context, List<Transaction> transactionList) {
+        this.context = context;
         this.transactionList = transactionList;
         this.currencyFormat = new DecimalFormat("#,###");
     }
@@ -28,7 +33,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @NonNull
     @Override
     public TransactionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        // Sử dụng context để lấy LayoutInflater
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_transaction, parent, false);
         return new TransactionViewHolder(view);
     }
@@ -37,7 +43,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         Transaction transaction = transactionList.get(position);
 
-        // Bind data from the Transaction object to the views
         holder.tvCategoryName.setText(transaction.getCategoryName());
         holder.tvDescription.setText(transaction.getDescription());
 
@@ -45,19 +50,17 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         String formattedAmount = currencyFormat.format(Math.abs(amount)) + " VND";
         holder.tvAmount.setText(formattedAmount);
 
-        // Set amount color based on whether it's income or expense
+        // Đặt màu theo thu (xanh) hoặc chi (đỏ)
         if (amount < 0) {
-            holder.tvAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.red_negative));
+            // Sử dụng Context để lấy màu
+            holder.tvAmount.setTextColor(ContextCompat.getColor(context, R.color.red_negative));
         } else {
-            holder.tvAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.green_positive));
+            // Sử dụng Context để lấy màu
+            holder.tvAmount.setTextColor(ContextCompat.getColor(context, R.color.green_positive));
         }
 
-        // Set category icon
+        // Icon
         holder.ivCategoryIcon.setImageResource(transaction.getCategoryIconResId());
-
-        // Note: The icon background logic you had previously might need to be implemented
-        // in your DatabaseHelper or a separate helper class if your database stores
-        // this information. For now, we'll stick to a simple icon setting.
     }
 
     @Override
@@ -65,9 +68,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         return transactionList.size();
     }
 
-    /**
-     * Updates the data in the adapter and notifies the RecyclerView.
-     */
     public void updateData(List<Transaction> newData) {
         this.transactionList.clear();
         this.transactionList.addAll(newData);

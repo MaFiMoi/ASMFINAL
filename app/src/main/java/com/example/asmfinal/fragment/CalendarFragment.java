@@ -1,38 +1,40 @@
-package com.example.asmfinal.Session;
+// Đã cập nhật xong ChartFragment.java ở phần trước
+// Bây giờ là: CalendarFragment.java
 
-import androidx.appcompat.app.AppCompatActivity;
+package com.example.asmfinal.fragment;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.asmfinal.database.DatabaseHelper;
 import com.example.asmfinal.R;
-import com.example.asmfinal.model.Transaction;
 import com.example.asmfinal.adapter.TransactionAdapter;
+import com.example.asmfinal.database.DatabaseHelper;
+import com.example.asmfinal.model.Transaction;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
-public class CalendarActivity extends AppCompatActivity {
+public class CalendarFragment extends Fragment {
 
     private Calendar currentCalendar;
     private GridLayout calendarGrid;
-    private TextView tvCurrentMonth;
-    private TextView tvTotalIncome, tvTotalExpense, tvTotal;
+    private TextView tvCurrentMonth, tvTotalIncome, tvTotalExpense, tvTotal;
     private ImageButton btnPreviousMonth, btnNextMonth;
     private RecyclerView recyclerViewTransactions;
     private TransactionAdapter transactionAdapter;
@@ -45,26 +47,28 @@ public class CalendarActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
     private View lastSelectedDayView = null;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_calendar);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_calendar, container, false);
 
-        initViews();
+        initViews(view);
         initData();
         setupRecyclerView();
         updateCalendarDisplay();
+
+        return view;
     }
 
-    private void initViews() {
-        calendarGrid = findViewById(R.id.calendarGrid);
-        tvCurrentMonth = findViewById(R.id.tvCurrentMonth);
-        tvTotalIncome = findViewById(R.id.tvTotalIncome);
-        tvTotalExpense = findViewById(R.id.tvTotalExpense);
-        tvTotal = findViewById(R.id.tvTotal);
-        btnPreviousMonth = findViewById(R.id.btnPreviousMonth);
-        btnNextMonth = findViewById(R.id.btnNextMonth);
-        recyclerViewTransactions = findViewById(R.id.recyclerViewTransactions);
+    private void initViews(View view) {
+        calendarGrid = view.findViewById(R.id.calendarGrid);
+        tvCurrentMonth = view.findViewById(R.id.tvCurrentMonth);
+        tvTotalIncome = view.findViewById(R.id.tvTotalIncome);
+        tvTotalExpense = view.findViewById(R.id.tvTotalExpense);
+        tvTotal = view.findViewById(R.id.tvTotal);
+        btnPreviousMonth = view.findViewById(R.id.btnPreviousMonth);
+        btnNextMonth = view.findViewById(R.id.btnNextMonth);
+        recyclerViewTransactions = view.findViewById(R.id.recyclerViewTransactions);
 
         btnPreviousMonth.setOnClickListener(v -> {
             currentCalendar.add(Calendar.MONTH, -1);
@@ -78,7 +82,7 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        databaseHelper = new DatabaseHelper(this);
+        databaseHelper = new DatabaseHelper(requireContext());
         currentCalendar = Calendar.getInstance();
         currencyFormat = new DecimalFormat("#,###");
         monthYearFormat = new SimpleDateFormat("MMMM yyyy", new Locale("vi", "VN"));
@@ -88,8 +92,8 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        transactionAdapter = new TransactionAdapter(this, selectedDayTransactions);
-        recyclerViewTransactions.setLayoutManager(new LinearLayoutManager(this));
+        transactionAdapter = new TransactionAdapter(requireContext(), selectedDayTransactions);
+        recyclerViewTransactions.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerViewTransactions.setAdapter(transactionAdapter);
     }
 
@@ -99,22 +103,25 @@ public class CalendarActivity extends AppCompatActivity {
         allTransactions = getTransactionsForCurrentMonthFromDb();
         selectedDayTransactions.clear();
         transactionAdapter.notifyDataSetChanged();
+
         Calendar tempCal = (Calendar) currentCalendar.clone();
         tempCal.set(Calendar.DAY_OF_MONTH, 1);
         int firstDayOfWeek = tempCal.get(Calendar.DAY_OF_WEEK);
         int daysInMonth = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH);
         int startDay = (firstDayOfWeek == Calendar.SUNDAY) ? 6 : firstDayOfWeek - 2;
+
         for (int i = 0; i < startDay; i++) {
             addEmptyDayView();
         }
         for (int day = 1; day <= daysInMonth; day++) {
             addDayView(day);
         }
+
         updateMonthlySummary();
     }
 
     private void addEmptyDayView() {
-        View emptyView = LayoutInflater.from(this).inflate(R.layout.calendar_day_empty, calendarGrid, false);
+        View emptyView = LayoutInflater.from(requireContext()).inflate(R.layout.calendar_day_empty, calendarGrid, false);
         GridLayout.LayoutParams params = new GridLayout.LayoutParams();
         params.width = 0;
         params.height = GridLayout.LayoutParams.WRAP_CONTENT;
@@ -124,7 +131,7 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void addDayView(int day) {
-        View dayView = LayoutInflater.from(this).inflate(R.layout.calendar_day_item, calendarGrid, false);
+        View dayView = LayoutInflater.from(requireContext()).inflate(R.layout.calendar_day_item, calendarGrid, false);
         TextView tvDay = dayView.findViewById(R.id.tvDay);
         TextView tvAmount = dayView.findViewById(R.id.tvAmount);
         View indicatorIncome = dayView.findViewById(R.id.indicatorIncome);
@@ -132,8 +139,7 @@ public class CalendarActivity extends AppCompatActivity {
 
         tvDay.setText(String.valueOf(day));
         List<Transaction> dayTransactions = getTransactionsForDay(day);
-        double totalIncome = 0;
-        double totalExpense = 0;
+        double totalIncome = 0, totalExpense = 0;
 
         for (Transaction transaction : dayTransactions) {
             if (transaction.isIncome()) {
@@ -172,6 +178,20 @@ public class CalendarActivity extends AppCompatActivity {
         calendarGrid.addView(dayView);
     }
 
+    private void showTransactionsForDay(int day) {
+        selectedDayTransactions.clear();
+        selectedDayTransactions.addAll(getTransactionsForDay(day));
+        transactionAdapter.notifyDataSetChanged();
+    }
+
+    private void highlightSelectedDay(View selectedDayView) {
+        if (lastSelectedDayView != null) {
+            lastSelectedDayView.setBackgroundResource(R.drawable.calendar_day_background);
+        }
+        selectedDayView.setBackgroundResource(R.drawable.calendar_day_selected_background);
+        lastSelectedDayView = selectedDayView;
+    }
+
     private List<Transaction> getTransactionsForDay(int day) {
         List<Transaction> dayTransactions = new ArrayList<>();
         Calendar dayCalendar = (Calendar) currentCalendar.clone();
@@ -188,20 +208,6 @@ public class CalendarActivity extends AppCompatActivity {
             }
         }
         return dayTransactions;
-    }
-
-    private void showTransactionsForDay(int day) {
-        selectedDayTransactions.clear();
-        selectedDayTransactions.addAll(getTransactionsForDay(day));
-        transactionAdapter.notifyDataSetChanged();
-    }
-
-    private void highlightSelectedDay(View selectedDayView) {
-        if (lastSelectedDayView != null) {
-            lastSelectedDayView.setBackgroundResource(R.drawable.calendar_day_background);
-        }
-        selectedDayView.setBackgroundResource(R.drawable.calendar_day_selected_background);
-        lastSelectedDayView = selectedDayView;
     }
 
     private void updateMonthlySummary() {
@@ -265,7 +271,7 @@ public class CalendarActivity extends AppCompatActivity {
                         try {
                             date = dbDateFormat.parse(dateString);
                         } catch (ParseException e) {
-                            Log.e("CalendarActivity", "Lỗi phân tích ngày tháng: " + dateString, e);
+                            Log.e("CalendarFragment", "Lỗi phân tích ngày: " + dateString, e);
                         }
                         int categoryIcon = R.drawable.ic_category_default;
                         if (date != null) {

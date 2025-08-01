@@ -40,5 +40,8 @@
 
     <color name="active_tab_color">#8BC34A</color>
     <color name="inactive_tab_color">#CCCCCC</color>
+    <color name="red">#FD1200</color>
+    <color name="color_selected_day">#E0E0E0</color>
+
 
 </resources>

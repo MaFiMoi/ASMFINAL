@@ -12,9 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ASMFINAL">
 
-        <!-- MainActivity sẽ là activity khởi động -->
         <activity
-            android:name=".Session.RegisterActivity"
+            android:name=".Session.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,10 +21,11 @@
             </intent-filter>
         </activity>
 
-        <!-- Không cần intent-filter cho LoginActivity và MainActivity -->
-        <activity android:name=".Session.LoginActivity" />
-        <activity android:name=".MainActivity" />
+        <activity android:name=".Session.RegisterActivity" />
+        <activity android:name=".Session.MainActivity" />
+
+        <!-- ĐÃ XOÁ các Activity không còn dùng -->
+        <!-- Fragment không cần khai báo ở đây -->
 
     </application>
-
 </manifest>

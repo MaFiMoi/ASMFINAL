@@ -5,9 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
-    tools:context=".Session.AccountActivity">
+    tools:context=".fragment.AccountFragment">
 
-    <!-- Header -->
     <RelativeLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -34,7 +33,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
-        android:layout_above="@id/bottomNavigation"
         android:fillViewport="true">
 
         <LinearLayout
@@ -42,7 +40,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Profile Section -->
             <LinearLayout
                 android:id="@+id/profileSection"
                 android:layout_width="match_parent"
@@ -54,7 +51,6 @@
                 android:paddingBottom="32dp"
                 android:visibility="gone">
 
-                <!-- Profile Image -->
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/profileImage"
                     android:layout_width="120dp"
@@ -63,7 +59,6 @@
                     app:civ_border_width="3dp"
                     app:civ_border_color="#E0E0E0" />
 
-                <!-- Monthly Savings Label -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -72,7 +67,6 @@
                     android:textColor="#666666"
                     android:textSize="14sp" />
 
-                <!-- Monthly Savings Amount -->
                 <TextView
                     android:id="@+id/tvMonthlySavings"
                     android:layout_width="wrap_content"
@@ -85,20 +79,17 @@
 
             </LinearLayout>
 
-            <!-- Divider -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="8dp"
                 android:background="#F5F5F5" />
 
-            <!-- Menu Items -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/white"
                 android:orientation="vertical">
 
-                <!-- Account -->
                 <LinearLayout
                     android:id="@+id/menuAccount"
                     android:layout_width="match_parent"
@@ -140,14 +131,12 @@
 
                 </LinearLayout>
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginLeft="72dp"
                     android:background="#F0F0F0" />
 
-                <!-- Change Password -->
                 <LinearLayout
                     android:id="@+id/menuChangePassword"
                     android:layout_width="match_parent"
@@ -189,14 +178,12 @@
 
                 </LinearLayout>
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginLeft="72dp"
                     android:background="#F0F0F0" />
 
-                <!-- Language -->
                 <LinearLayout
                     android:id="@+id/menuLanguage"
                     android:layout_width="match_parent"
@@ -238,14 +225,12 @@
 
                 </LinearLayout>
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginLeft="72dp"
                     android:background="#F0F0F0" />
 
-                <!-- Dark Mode -->
                 <LinearLayout
                     android:id="@+id/menuDarkMode"
                     android:layout_width="match_parent"
@@ -287,14 +272,12 @@
 
                 </LinearLayout>
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginLeft="72dp"
                     android:background="#F0F0F0" />
 
-                <!-- History -->
                 <LinearLayout
                     android:id="@+id/menuHistory"
                     android:layout_width="match_parent"
@@ -336,14 +319,12 @@
 
                 </LinearLayout>
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginLeft="72dp"
                     android:background="#F0F0F0" />
 
-                <!-- Export CSV -->
                 <LinearLayout
                     android:id="@+id/menuExportCSV"
                     android:layout_width="match_parent"
@@ -385,14 +366,12 @@
 
                 </LinearLayout>
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginLeft="72dp"
                     android:background="#F0F0F0" />
 
-                <!-- Exchange Rate -->
                 <LinearLayout
                     android:id="@+id/menuExchangeRate"
                     android:layout_width="match_parent"
@@ -436,7 +415,6 @@
 
             </LinearLayout>
 
-            <!-- Logout Button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -485,13 +463,11 @@
 
     </ScrollView>
 
-    <!-- No Data / Login Required Message -->
     <LinearLayout
         android:id="@+id/noDataContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
-        android:layout_above="@id/bottomNavigation"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="visible"
@@ -532,112 +508,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <!-- Bottom Navigation (same as your original) -->
-    <LinearLayout
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:background="@android:color/white"
-        android:elevation="8dp"
-        android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_home"
-                app:tint="#CCCCCC" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Trang Chủ"
-                android:textColor="#CCCCCC"
-                android:textSize="10sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_calendar"
-                app:tint="#CCCCCC" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Lịch"
-                android:textColor="#CCCCCC"
-                android:textSize="10sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chart"
-                app:tint="#CCCCCC" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Phân Tích"
-                android:textColor="#CCCCCC"
-                android:textSize="10sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_account"
-                app:tint="#8BC34A" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Tài Khoản"
-                android:textColor="#8BC34A"
-                android:textSize="10sp" />
-
-        </LinearLayout>
 
     </LinearLayout>
 
