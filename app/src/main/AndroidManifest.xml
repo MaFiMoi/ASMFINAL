@@ -14,7 +14,7 @@
 
         <!-- MainActivity sẽ là activity khởi động -->
         <activity
-            android:name=".MainActivity"
+            android:name=".Session.RegisterActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,8 +22,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Session.RegisterActivity" />
+        <!-- Không cần intent-filter cho LoginActivity và MainActivity -->
         <activity android:name=".Session.LoginActivity" />
+        <activity android:name=".MainActivity" />
 
     </application>
 

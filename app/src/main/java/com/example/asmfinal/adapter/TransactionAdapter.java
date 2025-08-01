@@ -9,8 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.asmfinal.R;
-import com.example.asmfinal.Session.Transaction;
-import com.example.asmfinal.Session.TransactionType;
+import com.example.asmfinal.model.Transaction;
+import com.example.asmfinal.adapter.TransactionAdapter;
 
 import java.text.DecimalFormat;
 import java.util.List;

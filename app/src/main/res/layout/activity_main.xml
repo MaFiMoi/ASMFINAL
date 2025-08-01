@@ -47,7 +47,6 @@
             android:text="Tháng sau"
             android:textColor="#4DD0E1"
             android:textSize="16sp" />
-
     </LinearLayout>
 
     <View
@@ -96,7 +95,6 @@
                     android:textColor="#333333"
                     android:textSize="16sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -121,7 +119,6 @@
                     android:textColor="#333333"
                     android:textSize="16sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
 
             <View
@@ -140,9 +137,7 @@
                 android:textColor="#333333"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
-
     </androidx.cardview.widget.CardView>
 
     <TextView
@@ -160,10 +155,11 @@
         android:textSize="14sp" />
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/bottomNavigation"
         android:layout_below="@id/tvExpenseListHeader"
-        android:layout_above="@id/fabAdd"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp">
@@ -178,8 +174,8 @@
                 android:id="@+id/recyclerViewExpenses"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" /> </LinearLayout>
-
+                android:nestedScrollingEnabled="false" />
+        </LinearLayout>
     </ScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -205,95 +201,95 @@
         android:paddingBottom="8dp">
 
         <LinearLayout
+            android:id="@+id/nav_home_layout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
+                android:id="@+id/ic_home"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_home"
-                app:tint="#8BC34A" /> <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Trang Chủ"
-            android:textColor="#8BC34A"
-            android:textSize="10sp" />
-
+                app:tint="#8BC34A" />
+            <TextView
+                android:id="@+id/tv_home"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Trang Chủ"
+                android:textColor="#8BC34A"
+                android:textSize="10sp" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/nav_calendar_layout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
+                android:id="@+id/ic_calendar"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_calendar"
                 app:tint="#CCCCCC" />
-
             <TextView
+                android:id="@+id/tv_calendar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Lịch"
                 android:textColor="#CCCCCC"
                 android:textSize="10sp" />
-
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/nav_chart_layout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
+                android:id="@+id/ic_chart"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_chart"
                 app:tint="#CCCCCC" />
-
             <TextView
+                android:id="@+id/tv_chart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Phân Tích"
                 android:textColor="#CCCCCC"
                 android:textSize="10sp" />
-
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/nav_account_layout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
+                android:id="@+id/ic_account"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_account"
                 app:tint="#CCCCCC" />
-
             <TextView
+                android:id="@+id/tv_account"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Tài Khoản"
                 android:textColor="#CCCCCC"
                 android:textSize="10sp" />
-
         </LinearLayout>
-
     </LinearLayout>
-
 </RelativeLayout>

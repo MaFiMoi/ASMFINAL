@@ -1,11 +1,8 @@
-// MainActivity.java
 package com.example.asmfinal.Session;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -15,19 +12,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.asmfinal.R;
+import com.example.asmfinal.database.DatabaseHelper;
+import com.example.asmfinal.model.User;
 
 import java.util.Calendar;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText iddate;
-    private Button Male, Female;
-    private TextView tvLoginLink; // Declare TextView
+    private EditText iddate, etFullName, etEmail, etPassword, etConfirmPassword;
+    private Button Male, Female, btnRegister;
+    private TextView tvLoginLink;
     private String selectedGender = "";
-    private Button selectedGenderButton = null; // Biến này sẽ giữ nút giới tính hiện đang được chọn
+    private Button selectedGenderButton = null;
+    private DatabaseHelper databaseHelper;
 
     private void handleGenderButtonClick(Button clickedButton) {
-        if (selectedGenderButton != null && selectedGenderButton != clickedButton) {
+        if (selectedGenderButton != null) {
             selectedGenderButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.holo_blue_dark));
             selectedGenderButton.setTextColor(ContextCompat.getColorStateList(this, R.color.white));
         }
@@ -35,13 +35,12 @@ public class RegisterActivity extends AppCompatActivity {
         selectedGenderButton = clickedButton;
 
         if (clickedButton.getId() == R.id.btnNu) {
-            selectedGender = "Female"; // ✅ Thêm dòng này
+            selectedGender = "Female";
             selectedGenderButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.pink_color));
         } else if (clickedButton.getId() == R.id.btnNam) {
-            selectedGender = "Male"; // ✅ Thêm dòng này
+            selectedGender = "Male";
             selectedGenderButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.green_light));
         }
-
         selectedGenderButton.setTextColor(ContextCompat.getColorStateList(this, R.color.white));
     }
 
@@ -49,62 +48,61 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.register_activity);
+
+        databaseHelper = new DatabaseHelper(this);
+
         iddate = findViewById(R.id.idDate);
         Male = findViewById(R.id.btnNam);
         Female = findViewById(R.id.btnNu);
-        tvLoginLink = findViewById(R.id.tvLoginNow); // Initialize the TextView
-        Button btnRegister = findViewById(R.id.btnRegister);
-        EditText etFullName = findViewById(R.id.idName);
-        EditText etEmail = findViewById(R.id.idEmail);
-        EditText etPassword = findViewById(R.id.idPass);
-        EditText etConfirmPassword = findViewById(R.id.idRepass);
+        tvLoginLink = findViewById(R.id.tvLoginNow);
+        btnRegister = findViewById(R.id.btnRegister);
+        etFullName = findViewById(R.id.idName);
+        etEmail = findViewById(R.id.idEmail);
+        etPassword = findViewById(R.id.idPass);
+        etConfirmPassword = findViewById(R.id.idRepass);
 
-        // Date Picker setup
-        iddate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog();
-            }
-        });
+        iddate.setOnClickListener(v -> showDatePickerDialog());
 
-        // Gender selection logic
-        Male.setOnClickListener(v -> {
-            handleGenderButtonClick(Male);
-        });
+        Male.setOnClickListener(v -> handleGenderButtonClick(Male));
+        Female.setOnClickListener(v -> handleGenderButtonClick(Female));
 
-        Female.setOnClickListener(v -> {
-            handleGenderButtonClick(Female);
-        });
+        btnRegister.setOnClickListener(v -> {
+            String fullName = etFullName.getText().toString().trim();
+            String email = etEmail.getText().toString().trim();
+            String date = iddate.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+            String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-        // Register button click listener
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String fullName = etFullName.getText().toString().trim();
-                String email = etEmail.getText().toString().trim();
-                String date = iddate.getText().toString().trim();
-                String password = etPassword.getText().toString().trim();
-                String confirmPassword = etConfirmPassword.getText().toString().trim();
+            if (fullName.isEmpty() || email.isEmpty() || date.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || selectedGender.isEmpty()) {
+                Toast.makeText(RegisterActivity.this, "Vui lòng điền đầy đủ tất cả các trường và chọn giới tính", Toast.LENGTH_SHORT).show();
+            } else if (!password.equals(confirmPassword)) {
+                Toast.makeText(RegisterActivity.this, "Mật khẩu không khớp", Toast.LENGTH_SHORT).show();
+            } else if (databaseHelper.checkEmailExists(email)) {
+                Toast.makeText(RegisterActivity.this, "Email này đã được đăng ký", Toast.LENGTH_SHORT).show();
+            } else {
+                // Sửa dòng code này để tạo đối tượng User với đầy đủ các tham số
+                User newUser = new User(email, password, fullName, date, selectedGender);
 
-                // Simple validation (you'll need more robust validation)
-                if (fullName.isEmpty() || email.isEmpty() || date.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || selectedGender.isEmpty()) {
-                    Toast.makeText(RegisterActivity.this, "Please fill all fields and select gender", Toast.LENGTH_SHORT).show();
-                } else if (!password.equals(confirmPassword)) {
-                    Toast.makeText(RegisterActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                long newRowId = databaseHelper.addUser(newUser); // Đã sửa kiểu dữ liệu từ boolean sang long
+
+                // Cập nhật câu lệnh if để kiểm tra thành công
+                // Phương thức insert() của SQLite trả về -1 nếu có lỗi
+                if (newRowId != -1) { // Kiểm tra xem ID trả về có phải là -1 không
+                    Toast.makeText(RegisterActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                    clearFields();
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
                 } else {
-                    Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                    // Here you would typically send data to a server or save locally
+                    Toast.makeText(RegisterActivity.this, "Đăng ký thất bại. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-        tvLoginLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Create an Intent to start LoginActivity
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                startActivity(intent); // Start the new activity
-                finish(); // Optional: Finish current activity so user can't go back to register
-            }
+
+        tvLoginLink.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 
@@ -122,17 +120,17 @@ public class RegisterActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    private void selectGender(Button selectedButton) {
-        // Reset colors for both buttons
-        Male.setSelected(false);
-        Female.setSelected(false);
-
-        // Set selected state for the clicked button
-        selectedButton.setSelected(true);
-        selectedButton.setSelected(true);
-        selectedButton.setBackgroundTintList(getColorStateList(R.color.green_light)); // Re-apply selector to update
-        selectedButton.setTextColor(getColorStateList(R.color.white)); // Re-apply selector to update
-
-        selectedGender = selectedButton.getText().toString();
+    private void clearFields() {
+        etFullName.setText("");
+        etEmail.setText("");
+        iddate.setText("");
+        etPassword.setText("");
+        etConfirmPassword.setText("");
+        selectedGender = "";
+        if (selectedGenderButton != null) {
+            selectedGenderButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.holo_blue_dark));
+            selectedGenderButton.setTextColor(ContextCompat.getColorStateList(this, R.color.white));
+            selectedGenderButton = null;
+        }
     }
 }

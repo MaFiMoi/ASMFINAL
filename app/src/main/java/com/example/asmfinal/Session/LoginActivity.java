@@ -1,51 +1,76 @@
 package com.example.asmfinal.Session;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.asmfinal.Session.MainActivity; // Đảm bảo đã import MainActivity
 import com.example.asmfinal.R;
+import com.example.asmfinal.database.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {
 
     EditText idEmail, idPass;
     Button btnLogin, btnGoogle, btnFacebook;
+    TextView tvSignUpNow;
+    DatabaseHelper databaseHelper;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
+
+        databaseHelper = new DatabaseHelper(this);
 
         idEmail = findViewById(R.id.idEmail);
         idPass = findViewById(R.id.idPass);
         btnLogin = findViewById(R.id.btnLogin);
         btnGoogle = findViewById(R.id.btnGoogle);
         btnFacebook = findViewById(R.id.btnFacebook);
+        tvSignUpNow = findViewById(R.id.tvSignUpNow);
 
         btnLogin.setOnClickListener(v -> {
             String email = idEmail.getText().toString().trim();
             String pass = idPass.getText().toString().trim();
 
             if (email.isEmpty() || pass.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Vui lòng điền đầy đủ tất cả các trường", Toast.LENGTH_SHORT).show();
             } else {
-                if (email.equals("admin@gmail.com") && pass.equals("123456")) {
-                    Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    // TODO: Chuyển sang màn hình chính
+                boolean isAuthenticated = databaseHelper.checkUser(email, pass);
+                if (isAuthenticated) {
+                    Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+
+                    // --- Bắt đầu thay đổi ---
+                    // Chuyển sang MainActivity sau khi đăng nhập thành công
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish(); // Kết thúc LoginActivity
+                    // --- Kết thúc thay đổi ---
+
                 } else {
-                    Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Email hoặc mật khẩu không hợp lệ", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         btnGoogle.setOnClickListener(v -> {
-            Toast.makeText(this, "Google login clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Chức năng đăng nhập bằng Google chưa được triển khai", Toast.LENGTH_SHORT).show();
         });
 
         btnFacebook.setOnClickListener(v -> {
-            Toast.makeText(this, "Facebook login clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Chức năng đăng nhập bằng Facebook chưa được triển khai", Toast.LENGTH_SHORT).show();
+        });
+
+        tvSignUpNow.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 }

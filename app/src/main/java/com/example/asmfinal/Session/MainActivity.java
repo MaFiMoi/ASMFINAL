@@ -1,26 +1,33 @@
-package com.example.asmfinal;
+package com.example.asmfinal.Session;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageView;
 
-import androidx.appcompat.app.AlertDialog; // Use AlertDialog from androidx
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager; // Import LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView; // Import RecyclerView
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.asmfinal.R;
+import com.example.asmfinal.Session.LoginActivity;
+import com.example.asmfinal.Session.CalendarActivity; // ;Import CalendarActivity
 import com.example.asmfinal.adapter.Expense;
-import com.example.asmfinal.adapter.ExpenseAdapter; // Import your ExpenseAdapter
+import com.example.asmfinal.adapter.ExpenseAdapter;
 import com.example.asmfinal.database.DatabaseHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -39,16 +46,17 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private TextView tvInitialBalance, tvFinalBalance, tvTotalExpense;
     private FloatingActionButton fabAdd;
-
-    // RecyclerView components
     private RecyclerView recyclerViewExpenses;
     private ExpenseAdapter expenseAdapter;
-    private List<Expense> monthlyCategoryExpenses; // List to hold summarized category expenses for the RecyclerView
+    private List<Expense> monthlyCategoryExpenses;
 
-    private static final int INITIAL_BALANCE = 30000000; // 30 million VND
+    // Custom Bottom Navigation components
+    private LinearLayout navHomeLayout, navCalendarLayout, navChartLayout, navAccountLayout;
+    private ImageView icHome, icCalendar, icChart, icAccount;
+    private TextView tvHome, tvCalendar, tvChart, tvAccount;
+
+    private static final int INITIAL_BALANCE = 30000000;
     private DecimalFormat formatter = new DecimalFormat("#,###");
-
-    // Expense categories with their names
     private Map<String, String> categoryNames = new HashMap<>();
 
     @Override
@@ -59,8 +67,9 @@ public class MainActivity extends AppCompatActivity {
         initializeViews();
         initializeDatabase();
         initializeCategories();
-        setupRecyclerView(); // Setup RecyclerView here
+        setupRecyclerView();
         setupClickListeners();
+        setupCustomBottomNavigation();
         loadExpenseData();
     }
 
@@ -69,7 +78,78 @@ public class MainActivity extends AppCompatActivity {
         tvFinalBalance = findViewById(R.id.tvFinalBalance);
         tvTotalExpense = findViewById(R.id.tvTotalExpense);
         fabAdd = findViewById(R.id.fabAdd);
-        recyclerViewExpenses = findViewById(R.id.recyclerViewExpenses); // Get reference to RecyclerView
+        recyclerViewExpenses = findViewById(R.id.recyclerViewExpenses);
+
+        // Ánh xạ các thành phần của custom bottom navigation
+        navHomeLayout = findViewById(R.id.nav_home_layout);
+        navCalendarLayout = findViewById(R.id.nav_calendar_layout);
+        navChartLayout = findViewById(R.id.nav_chart_layout);
+        navAccountLayout = findViewById(R.id.nav_account_layout);
+
+        icHome = findViewById(R.id.ic_home);
+        icCalendar = findViewById(R.id.ic_calendar);
+        icChart = findViewById(R.id.ic_chart);
+        icAccount = findViewById(R.id.ic_account);
+
+        tvHome = findViewById(R.id.tv_home);
+        tvCalendar = findViewById(R.id.tv_calendar);
+        tvChart = findViewById(R.id.tv_chart);
+        tvAccount = findViewById(R.id.tv_account);
+    }
+
+    private void setupCustomBottomNavigation() {
+        // Đặt màu mặc định cho tab Home (đã được chọn)
+        setActiveTab(icHome, tvHome);
+
+        navHomeLayout.setOnClickListener(v -> {
+            setActiveTab(icHome, tvHome);
+            Toast.makeText(this, "Bạn đang ở Trang Chủ", Toast.LENGTH_SHORT).show();
+            // Không cần Intent vì đã ở MainActivity
+        });
+
+        navCalendarLayout.setOnClickListener(v -> {
+            setActiveTab(icCalendar, tvCalendar);
+            // Chuyển sang CalendarActivity
+            Intent intent = new Intent(MainActivity.this, CalendarActivity.class);
+            startActivity(intent);
+            // Có thể thêm finish() nếu không muốn quay lại MainActivity
+            // finish();
+        });
+
+        navChartLayout.setOnClickListener(v -> {
+            setActiveTab(icChart, tvChart);
+            Toast.makeText(this, "Chức năng Phân Tích", Toast.LENGTH_SHORT).show();
+            // TODO: Chuyển sang ChartActivity
+            // Intent intent = new Intent(MainActivity.this, ChartActivity.class);
+            // startActivity(intent);
+        });
+
+        navAccountLayout.setOnClickListener(v -> {
+            setActiveTab(icAccount, tvAccount);
+            Toast.makeText(this, "Chức năng Tài Khoản", Toast.LENGTH_SHORT).show();
+            // TODO: Chuyển sang AccountActivity
+            // Intent intent = new Intent(MainActivity.this, AccountActivity.class);
+            // startActivity(intent);
+        });
+    }
+
+    private void setActiveTab(ImageView activeIcon, TextView activeText) {
+        // Reset tất cả các tab về màu inactive
+        int inactiveColor = ContextCompat.getColor(this, R.color.inactive_tab_color);
+        icHome.setColorFilter(inactiveColor);
+        icCalendar.setColorFilter(inactiveColor);
+        icChart.setColorFilter(inactiveColor);
+        icAccount.setColorFilter(inactiveColor);
+
+        tvHome.setTextColor(inactiveColor);
+        tvCalendar.setTextColor(inactiveColor);
+        tvChart.setTextColor(inactiveColor);
+        tvAccount.setTextColor(inactiveColor);
+
+        // Đặt màu active cho tab được chọn
+        int activeColor = ContextCompat.getColor(this, R.color.active_tab_color);
+        activeIcon.setColorFilter(activeColor);
+        activeText.setTextColor(activeColor);
     }
 
     private void initializeDatabase() {
@@ -86,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        monthlyCategoryExpenses = new ArrayList<>(); // Initialize the list for the adapter
+        monthlyCategoryExpenses = new ArrayList<>();
         expenseAdapter = new ExpenseAdapter(monthlyCategoryExpenses);
         recyclerViewExpenses.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewExpenses.setAdapter(expenseAdapter);
@@ -102,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadExpenseData() {
-        // Get current month date range
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         String startDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
@@ -110,15 +189,11 @@ public class MainActivity extends AppCompatActivity {
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         String endDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
 
-        // Get expenses for current month
         List<Expense> expenses = dbHelper.getExpensesForMonth(startDate, endDate);
-
         Map<String, Integer> categoryTotals = new HashMap<>();
         int totalExpenses = 0;
 
-        // Calculate totals by category
         for (Expense expense : expenses) {
-            // Ensure the category from DB matches keys in categoryNames map, default to "food" if null/unknown
             String category = expense.getCategory() != null && categoryNames.containsKey(expense.getCategory())
                     ? expense.getCategory() : "food";
             int currentTotal = categoryTotals.getOrDefault(category, 0);
@@ -130,34 +205,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI(Map<String, Integer> categoryTotals, int totalExpenses) {
-        // Update balance information
         tvInitialBalance.setText(formatter.format(INITIAL_BALANCE) + " VND");
         int finalBalance = INITIAL_BALANCE - totalExpenses;
         tvFinalBalance.setText(formatter.format(finalBalance) + " VND");
         tvTotalExpense.setText("-" + formatter.format(totalExpenses) + " VND");
 
-        // Prepare data for RecyclerView
-        monthlyCategoryExpenses.clear(); // Clear previous data
+        monthlyCategoryExpenses.clear();
         for (Map.Entry<String, String> entry : categoryNames.entrySet()) {
             String categoryKey = entry.getKey();
             String categoryName = entry.getValue();
             int amount = categoryTotals.getOrDefault(categoryKey, 0);
 
             if (amount > 0) {
-                // For RecyclerView, the 'date' can be empty or the current month,
-                // as the RecyclerView items are now categories with total amounts for the month.
-                // We'll pass the categoryKey in the description or title for details screen.
-                monthlyCategoryExpenses.add(new Expense(categoryName, amount, categoryKey)); // Using categoryKey as 'date' temporarily for simplicity
+                monthlyCategoryExpenses.add(new Expense(categoryName, amount, categoryKey));
             }
         }
-        expenseAdapter.notifyDataSetChanged(); // Notify adapter of data change
+        expenseAdapter.notifyDataSetChanged();
 
-        // Set up click listeners for the RecyclerView items
         expenseAdapter.setOnItemClickListener(new ExpenseAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Expense expense) {
-                // The 'date' field of the Expense object in monthlyCategoryExpenses list
-                // is now storing the categoryKey.
                 showExpenseDetails(expense.getDate(), expense.getTitle());
             }
         });
@@ -172,28 +239,22 @@ public class MainActivity extends AppCompatActivity {
                 CardView.LayoutParams.WRAP_CONTENT
         );
 
-        // Initialize dialog views
         Spinner spinnerCategory = dialog.findViewById(R.id.spinnerCategory);
         EditText etAmount = dialog.findViewById(R.id.etAmount);
-        EditText etDescription = dialog.findViewById(R.id.etDescription); // Now an EditText
+        EditText etDescription = dialog.findViewById(R.id.etDescription);
         Button btnCancel = dialog.findViewById(R.id.btnCancel);
         Button btnSave = dialog.findViewById(R.id.btnSave);
 
-        // Date and Time TextViews
         TextView txtDate = dialog.findViewById(R.id.txtDate);
         TextView txtTime = dialog.findViewById(R.id.txtTime);
 
-        // Get current date and time to pre-fill or use as starting point
-        final Calendar selectedCalendar = Calendar.getInstance(); // Use a Calendar to store the selected date/time
+        final Calendar selectedCalendar = Calendar.getInstance();
 
-        // Format and set initial date/time (current date/time)
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         txtDate.setText(dateFormat.format(selectedCalendar.getTime()));
-
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         txtTime.setText(timeFormat.format(selectedCalendar.getTime()));
 
-        // Setup category spinner
         List<String> categories = new ArrayList<>();
         for (String categoryName : categoryNames.values()) {
             categories.add(categoryName);
@@ -203,90 +264,68 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(adapter);
 
-        // Set up click listener for Date
-        txtDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        MainActivity.this,
-                        (view, year, month, dayOfMonth) -> {
-                            selectedCalendar.set(Calendar.YEAR, year);
-                            selectedCalendar.set(Calendar.MONTH, month);
-                            selectedCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                            txtDate.setText(dateFormat.format(selectedCalendar.getTime()));
-                        },
-                        selectedCalendar.get(Calendar.YEAR),
-                        selectedCalendar.get(Calendar.MONTH),
-                        selectedCalendar.get(Calendar.DAY_OF_MONTH)
-                );
-                datePickerDialog.show();
-            }
+        txtDate.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    MainActivity.this,
+                    (view, year, month, dayOfMonth) -> {
+                        selectedCalendar.set(Calendar.YEAR, year);
+                        selectedCalendar.set(Calendar.MONTH, month);
+                        selectedCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        txtDate.setText(dateFormat.format(selectedCalendar.getTime()));
+                    },
+                    selectedCalendar.get(Calendar.YEAR),
+                    selectedCalendar.get(Calendar.MONTH),
+                    selectedCalendar.get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.show();
         });
 
-        // Set up click listener for Time
-        txtTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TimePickerDialog timePickerDialog = new TimePickerDialog(
-                        MainActivity.this,
-                        (view, hourOfDay, minute) -> {
-                            selectedCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                            selectedCalendar.set(Calendar.MINUTE, minute);
-                            txtTime.setText(timeFormat.format(selectedCalendar.getTime()));
-                        },
-                        selectedCalendar.get(Calendar.HOUR_OF_DAY),
-                        selectedCalendar.get(Calendar.MINUTE),
-                        true // true for 24-hour format, false for AM/PM
-                );
-                timePickerDialog.show();
-            }
+        txtTime.setOnClickListener(v -> {
+            TimePickerDialog timePickerDialog = new TimePickerDialog(
+                    MainActivity.this,
+                    (view, hourOfDay, minute) -> {
+                        selectedCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        selectedCalendar.set(Calendar.MINUTE, minute);
+                        txtTime.setText(timeFormat.format(selectedCalendar.getTime()));
+                    },
+                    selectedCalendar.get(Calendar.HOUR_OF_DAY),
+                    selectedCalendar.get(Calendar.MINUTE),
+                    true
+            );
+            timePickerDialog.show();
         });
 
-
-        // Setup button listeners
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
+        btnCancel.setOnClickListener(v -> {
+            dialog.dismiss();
         });
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String selectedCategory = spinnerCategory.getSelectedItem().toString();
-                String amountStr = etAmount.getText().toString().trim();
-                String description = etDescription.getText().toString().trim(); // Get text from EditText
+        btnSave.setOnClickListener(v -> {
+            String selectedCategory = spinnerCategory.getSelectedItem().toString();
+            String amountStr = etAmount.getText().toString().trim();
+            String description = etDescription.getText().toString().trim();
 
-                if (amountStr.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Vui lòng nhập số tiền", Toast.LENGTH_SHORT).show();
+            if (amountStr.isEmpty()) {
+                Toast.makeText(MainActivity.this, "Vui lòng nhập số tiền", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                int amount = Integer.parseInt(amountStr);
+                if (amount <= 0) {
+                    Toast.makeText(MainActivity.this, "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                try {
-                    int amount = Integer.parseInt(amountStr);
-                    if (amount <= 0) {
-                        Toast.makeText(MainActivity.this, "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                String categoryKey = getCategoryKeyFromName(selectedCategory);
+                String selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedCalendar.getTime());
+                saveExpense(categoryKey, amount, description, selectedDate);
 
-                    // Get category key from name
-                    String categoryKey = getCategoryKeyFromName(selectedCategory);
+                dialog.dismiss();
+                loadExpenseData();
+                Toast.makeText(MainActivity.this, "Đã thêm chi tiêu thành công", Toast.LENGTH_SHORT).show();
 
-                    // Get the selected date from selectedCalendar for saving
-                    String selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedCalendar.getTime());
-
-                    // Save to database with the selected date
-                    saveExpense(categoryKey, amount, description, selectedDate);
-
-                    dialog.dismiss();
-                    loadExpenseData(); // Refresh the UI
-
-                    Toast.makeText(MainActivity.this, "Đã thêm chi tiêu thành công", Toast.LENGTH_SHORT).show();
-
-                } catch (NumberFormatException e) {
-                    Toast.makeText(MainActivity.this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
-                }
+            } catch (NumberFormatException e) {
+                Toast.makeText(MainActivity.this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -299,20 +338,17 @@ public class MainActivity extends AppCompatActivity {
                 return entry.getKey();
             }
         }
-        return "food"; // default
+        return "food";
     }
 
-    // Modified saveExpense to accept a dateString
     private void saveExpense(String category, int amount, String description, String dateString) {
         long result = dbHelper.insertExpenseWithCategory(description, amount, dateString, category);
-
         if (result == -1) {
             Toast.makeText(this, "Lỗi khi lưu dữ liệu", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showExpenseDetails(String categoryKey, String categoryName) {
-        // Get current month date range
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         String startDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
@@ -320,11 +356,9 @@ public class MainActivity extends AppCompatActivity {
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         String endDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
 
-        // Get expenses for this category
         List<Expense> expenses = dbHelper.getExpensesByCategory(categoryKey, startDate, endDate);
-
         StringBuilder details = new StringBuilder();
-        details.append(categoryName).append(":\n\n"); // Use categoryName directly for display
+        details.append(categoryName).append(":\n\n");
 
         int total = 0;
         for (Expense expense : expenses) {
@@ -339,7 +373,6 @@ public class MainActivity extends AppCompatActivity {
 
         details.append("Tổng cộng: ").append(formatter.format(total)).append(" VND");
 
-        // Show details dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Chi tiết chi tiêu")
                 .setMessage(details.toString())

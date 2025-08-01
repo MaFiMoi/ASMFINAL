@@ -58,7 +58,7 @@
         android:textSize="14sp" />
 
     <Button
-        android:id="@+id/btnLog"
+        android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
@@ -83,6 +83,7 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/btnGoogle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
@@ -90,6 +91,7 @@
             android:text="Google" />
 
         <Button
+            android:id="@+id/btnFacebook"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@android:color/holo_blue_dark"
@@ -97,6 +99,7 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tvSignUpNow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"

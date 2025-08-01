@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.example.asmfinal.adapter.Expense;
-import com.example.asmfinal.model.User; // Ensure your User model exists
+import com.example.asmfinal.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,28 +17,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
 
     private static final String DATABASE_NAME = "AppManager.db";
-    private static final int DATABASE_VERSION = 2; // *** IMPORTANT: Increment this to 2 ***
+    private static final int DATABASE_VERSION = 4;
 
     // Users table
     private static final String TABLE_USER = "users";
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_USERNAME = "username";
+    private static final String COLUMN_EMAIL = "email";
     private static final String COLUMN_PASSWORD = "password";
     private static final String COLUMN_FULLNAME = "fullname";
+    private static final String COLUMN_DATE_OF_BIRTH = "date_of_birth";
+    private static final String COLUMN_GENDER = "gender";
 
     // Expenses table
     private static final String TABLE_EXPENSE = "expenses";
-    private static final String COLUMN_EXPENSE_ID = "id"; // Ensure this matches your table's primary key name
+    private static final String COLUMN_EXPENSE_ID = "id";
     private static final String COLUMN_TITLE = "title";
     private static final String COLUMN_AMOUNT = "amount";
     private static final String COLUMN_DATE = "date";
-    private static final String COLUMN_CATEGORY = "category"; // This column is now handled
+    private static final String COLUMN_CATEGORY = "category";
 
     private static final String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_USER + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + COLUMN_USERNAME + " TEXT UNIQUE,"
+            + COLUMN_EMAIL + " TEXT UNIQUE,"
             + COLUMN_PASSWORD + " TEXT,"
-            + COLUMN_FULLNAME + " TEXT"
+            + COLUMN_FULLNAME + " TEXT,"
+            + COLUMN_DATE_OF_BIRTH + " TEXT,"
+            + COLUMN_GENDER + " TEXT"
             + ")";
 
     private static final String CREATE_EXPENSE_TABLE = "CREATE TABLE " + TABLE_EXPENSE + "("
@@ -46,7 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_TITLE + " TEXT,"
             + COLUMN_AMOUNT + " INTEGER,"
             + COLUMN_DATE + " TEXT,"
-            + COLUMN_CATEGORY + " TEXT" // Correctly defined here
+            + COLUMN_CATEGORY + " TEXT"
             + ")";
 
     public DatabaseHelper(Context context) {
@@ -64,29 +68,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "onUpgrade: Nâng cấp database từ " + oldVersion + " lên " + newVersion + ". Xóa và tạo lại bảng.");
-        // *** WARNING: This will delete all existing data ***
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXPENSE);
-        onCreate(db); // Recreate tables with the new schema
+        onCreate(db);
     }
 
-    // User methods (No changes needed here for this problem)
+    // User methods
     public long addUser(User user) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_USERNAME, user.getUsername());
+        values.put(COLUMN_EMAIL, user.getEmail());
         values.put(COLUMN_PASSWORD, user.getPassword());
         values.put(COLUMN_FULLNAME, user.getFullName());
+        values.put(COLUMN_DATE_OF_BIRTH, user.getDateOfBirth());
+        values.put(COLUMN_GENDER, user.getGender());
         long id = db.insert(TABLE_USER, null, values);
         db.close();
         return id;
     }
 
-    public boolean checkUser(String username, String password) {
+    public boolean checkUser(String email, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {COLUMN_ID};
-        String selection = COLUMN_USERNAME + " = ? AND " + COLUMN_PASSWORD + " = ?";
-        String[] args = {username, password};
+        String selection = COLUMN_EMAIL + " = ? AND " + COLUMN_PASSWORD + " = ?";
+        String[] args = {email, password};
         Cursor cursor = db.query(TABLE_USER, columns, selection, args, null, null, null);
         boolean exists = cursor.getCount() > 0;
         cursor.close();
@@ -94,11 +99,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    public boolean checkUsername(String username) {
+    public boolean checkEmailExists(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {COLUMN_ID};
-        String selection = COLUMN_USERNAME + " = ?";
-        String[] args = {username};
+        String selection = COLUMN_EMAIL + " = ?";
+        String[] args = {email};
         Cursor cursor = db.query(TABLE_USER, columns, selection, args, null, null, null);
         boolean exists = cursor.getCount() > 0;
         cursor.close();
@@ -114,9 +119,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 User user = new User();
                 user.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)));
-                user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)));
                 user.setPassword(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD)));
                 user.setFullName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FULLNAME)));
+                user.setDateOfBirth(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_OF_BIRTH)));
+                user.setGender(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_GENDER)));
                 userList.add(user);
             } while (cursor.moveToNext());
         }
@@ -125,47 +132,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return userList;
     }
 
-    public User getUserByUsername(String username) {
+    public User getUserByEmail(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
         User user = null;
-        String[] columns = {COLUMN_ID, COLUMN_USERNAME, COLUMN_PASSWORD, COLUMN_FULLNAME};
-        String selection = COLUMN_USERNAME + " = ?";
-        String[] args = {username};
+        String[] columns = {COLUMN_ID, COLUMN_EMAIL, COLUMN_PASSWORD, COLUMN_FULLNAME, COLUMN_DATE_OF_BIRTH, COLUMN_GENDER};
+        String selection = COLUMN_EMAIL + " = ?";
+        String[] args = {email};
         Cursor cursor = db.query(TABLE_USER, columns, selection, args, null, null, null);
         if (cursor.moveToFirst()) {
             user = new User();
             user.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)));
-            user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME)));
+            user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)));
             user.setPassword(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD)));
             user.setFullName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FULLNAME)));
+            user.setDateOfBirth(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_OF_BIRTH)));
+            user.setGender(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_GENDER)));
         }
         cursor.close();
         db.close();
         return user;
     }
 
-    // Expense methods
-    // This method might not be used anymore if you always insert with category
+    // Expense methods... (giữ nguyên)
     public long insertExpense(String title, int amount, String date) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITLE, title);
         values.put(COLUMN_AMOUNT, amount);
         values.put(COLUMN_DATE, date);
-        // values.put(COLUMN_CATEGORY, ""); // Consider adding a default or removing this method
         long id = db.insert(TABLE_EXPENSE, null, values);
         db.close();
         return id;
     }
 
-    // Main method for inserting expenses
     public long insertExpenseWithCategory(String title, int amount, String date, String category) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITLE, title);
         values.put(COLUMN_AMOUNT, amount);
         values.put(COLUMN_DATE, date);
-        values.put(COLUMN_CATEGORY, category); // Now correctly inserting the category
+        values.put(COLUMN_CATEGORY, category);
         long id = db.insert(TABLE_EXPENSE, null, values);
         db.close();
         return id;
@@ -178,13 +184,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(query, new String[]{startDate, endDate});
         if (cursor.moveToFirst()) {
             do {
-                // Correctly mapping all columns, including ID and Category
                 Expense expense = new Expense(
                         cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_ID)),
                         cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
                         cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT)),
                         cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)) // Get the category
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY))
                 );
                 expenses.add(expense);
             } while (cursor.moveToNext());
@@ -201,13 +206,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(query, new String[]{category, startDate, endDate});
         if (cursor.moveToFirst()) {
             do {
-                // Correctly mapping all columns, including ID and Category
                 Expense expense = new Expense(
                         cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_ID)),
                         cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
                         cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT)),
                         cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)) // Get the category
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY))
                 );
                 expenses.add(expense);
             } while (cursor.moveToNext());

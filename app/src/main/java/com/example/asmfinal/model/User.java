@@ -4,92 +4,82 @@ package com.example.asmfinal.model;
  * Represents a user entity with basic authentication and personal information.
  */
 public class User {
-    private int id;             // ID duy nhất của user
-    private String username;    // Tên đăng nhập
-    private String password;    // Mật khẩu
-    private String fullName;    // Họ tên đầy đủ
+    private int id;
+    private String email;
+    private String password;
+    private String fullName;
+    private String dateOfBirth;
+    private String gender;
 
     // Constructor mặc định
     public User() {
     }
 
-    // Constructor với đầy đủ tham số
-    public User(int id, String username, String password, String fullName) {
+    // Constructor với đầy đủ tham số (dùng khi đọc từ database)
+    public User(int id, String email, String password, String fullName, String dateOfBirth, String gender) {
         this.id = id;
-        this.username = username;
+        this.email = email;
         this.password = password;
         this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
     }
 
-    // Constructor không có id (dùng khi tạo user mới)
-    public User(String username, String password, String fullName) {
-        this.username = username;
+    // Constructor không có id (dùng khi tạo user mới để lưu vào database)
+    public User(String email, String password, String fullName, String dateOfBirth, String gender) {
+        this.email = email;
         this.password = password;
         this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
     }
 
     // Getters và Setters
-    /**
-     * Returns the unique ID of the user.
-     * @return the user ID
-     */
     public int getId() {
         return id;
     }
 
-    /**
-     * Sets the unique ID of the user.
-     * @param id the user ID to set
-     */
     public void setId(int id) {
         this.id = id;
     }
 
-    /**
-     * Returns the username of the user.
-     * @return the username
-     */
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    /**
-     * Sets the username of the user.
-     * @param username the username to set
-     */
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    /**
-     * Returns the password of the user.
-     * @return the password
-     */
     public String getPassword() {
         return password;
     }
 
-    /**
-     * Sets the password of the user.
-     * @param password the password to set
-     */
     public void setPassword(String password) {
         this.password = password;
     }
 
-    /**
-     * Returns the full name of the user.
-     * @return the full name
-     */
     public String getFullName() {
         return fullName;
     }
 
-    /**
-     * Sets the full name of the user.
-     * @param fullName the full name to set
-     */
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }
