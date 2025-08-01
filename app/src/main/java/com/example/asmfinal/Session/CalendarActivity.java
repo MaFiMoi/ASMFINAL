@@ -1,14 +1,20 @@
 package com.example.asmfinal.Session;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
+import android.widget.Toast;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.asmfinal.DatabaseHelper;
 import com.example.asmfinal.R;
 import com.example.asmfinal.model.TransactionType;
 
@@ -16,6 +22,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -33,6 +40,9 @@ public class CalendarActivity extends AppCompatActivity {
     private List<Transaction> selectedDayTransactions;
     private DecimalFormat currencyFormat;
     private SimpleDateFormat monthYearFormat;
+
+    // DatabaseHelper instance
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,12 +78,14 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void initData() {
+        // Initialize DatabaseHelper
+        databaseHelper = new DatabaseHelper(this);
+
         currentCalendar = Calendar.getInstance();
         currencyFormat = new DecimalFormat("#,###");
-        monthYearFormat = new SimpleDateFormat("'tháng' MM 'năm' yyyy", new Locale("vi", "VN"));
+        monthYearFormat = new SimpleDateFormat("'Month' MM 'Year' yyyy", Locale.US); // Using US locale for English format
 
-        // Initialize with sample data
-        allTransactions = createSampleTransactions();
+        allTransactions = new ArrayList<>();
         selectedDayTransactions = new ArrayList<>();
     }
 
@@ -94,6 +106,13 @@ public class CalendarActivity extends AppCompatActivity {
         // Clear existing calendar
         calendarGrid.removeAllViews();
 
+        // Load transactions from database for the current month
+        allTransactions = getTransactionsForCurrentMonthFromDb();
+
+        // Reset selected day transactions
+        selectedDayTransactions.clear();
+        transactionAdapter.notifyDataSetChanged();
+
         // Calculate calendar data
         Calendar tempCal = (Calendar) currentCalendar.clone();
         tempCal.set(Calendar.DAY_OF_MONTH, 1);
@@ -101,7 +120,7 @@ public class CalendarActivity extends AppCompatActivity {
         int firstDayOfWeek = tempCal.get(Calendar.DAY_OF_WEEK);
         int daysInMonth = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-        // Adjust for Monday start (Vietnamese calendar)
+        // Adjust for Monday start
         int startDay = (firstDayOfWeek == Calendar.SUNDAY) ? 6 : firstDayOfWeek - 2;
 
         // Add empty cells for days before month starts
@@ -190,7 +209,6 @@ public class CalendarActivity extends AppCompatActivity {
 
     private List<Transaction> getTransactionsForDay(int day) {
         List<Transaction> dayTransactions = new ArrayList<>();
-
         Calendar dayCalendar = (Calendar) currentCalendar.clone();
         dayCalendar.set(Calendar.DAY_OF_MONTH, day);
 
@@ -204,7 +222,6 @@ public class CalendarActivity extends AppCompatActivity {
                 dayTransactions.add(transaction);
             }
         }
-
         return dayTransactions;
     }
 
@@ -220,7 +237,6 @@ public class CalendarActivity extends AppCompatActivity {
             View child = calendarGrid.getChildAt(i);
             child.setSelected(false);
         }
-
         // Highlight selected day
         selectedDayView.setSelected(true);
     }
@@ -229,25 +245,11 @@ public class CalendarActivity extends AppCompatActivity {
         double totalIncome = 0;
         double totalExpense = 0;
 
-        Calendar monthStart = (Calendar) currentCalendar.clone();
-        monthStart.set(Calendar.DAY_OF_MONTH, 1);
-        monthStart.set(Calendar.HOUR_OF_DAY, 0);
-        monthStart.set(Calendar.MINUTE, 0);
-        monthStart.set(Calendar.SECOND, 0);
-
-        Calendar monthEnd = (Calendar) monthStart.clone();
-        monthEnd.add(Calendar.MONTH, 1);
-        monthEnd.add(Calendar.SECOND, -1);
-
         for (Transaction transaction : allTransactions) {
-            if (transaction.getDate().compareTo(monthStart.getTime()) >= 0 &&
-                    transaction.getDate().compareTo(monthEnd.getTime()) <= 0) {
-
-                if (transaction.getAmount() > 0) {
-                    totalIncome += transaction.getAmount();
-                } else {
-                    totalExpense += Math.abs(transaction.getAmount());
-                }
+            if (transaction.getAmount() > 0) {
+                totalIncome += transaction.getAmount();
+            } else {
+                totalExpense += Math.abs(transaction.getAmount());
             }
         }
 
@@ -269,44 +271,66 @@ public class CalendarActivity extends AppCompatActivity {
         return currencyFormat.format(Math.abs(amount));
     }
 
-    private List<Transaction> createSampleTransactions() {
+    /**
+     * Method to fetch all transactions for the current month from the database.
+     */
+    private List<Transaction> getTransactionsForCurrentMonthFromDb() {
         List<Transaction> transactions = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
-        // Sample transactions for December 2022
-        cal.set(2022, Calendar.DECEMBER, 2);
-        transactions.add(new Transaction("Di chuyển", -50000, cal.getTime(),
-                TransactionType.TRANSPORT, R.drawable.ic_transport));
+        // Get the start and end of the current month
+        Calendar monthStart = (Calendar) currentCalendar.clone();
+        monthStart.set(Calendar.DAY_OF_MONTH, 1);
+        monthStart.set(Calendar.HOUR_OF_DAY, 0);
+        monthStart.set(Calendar.MINUTE, 0);
+        monthStart.set(Calendar.SECOND, 0);
 
-        cal.set(2022, Calendar.DECEMBER, 3);
-        transactions.add(new Transaction("Thu nhập khác", 1000000, cal.getTime(),
-                TransactionType.INCOME, R.drawable.ic_money));
+        Calendar monthEnd = (Calendar) monthStart.clone();
+        monthEnd.add(Calendar.MONTH, 1);
+        monthEnd.add(Calendar.SECOND, -1);
 
-        cal.set(2022, Calendar.DECEMBER, 5);
-        transactions.add(new Transaction("Tiền điện", -300000, cal.getTime(),
-                TransactionType.UTILITIES, R.drawable.ic_electricity));
+        SimpleDateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        cal.set(2022, Calendar.DECEMBER, 8);
-        transactions.add(new Transaction("Tiền nước", -100000, cal.getTime(),
-                TransactionType.UTILITIES, R.drawable.ic_water));
+        String selection = DatabaseHelper.COLUMN_TRANSACTION_DATE + " BETWEEN ? AND ?";
+        String[] selectionArgs = {
+                dbDateFormat.format(monthStart.getTime()),
+                dbDateFormat.format(monthEnd.getTime())
+        };
 
-        cal.set(2022, Calendar.DECEMBER, 10);
-        transactions.add(new Transaction("Ăn uống", -250000, cal.getTime(),
-                TransactionType.FOOD, R.drawable.ic_food));
+        Cursor cursor = db.query(
+                DatabaseHelper.TABLE_EXPENSES,
+                null, // Get all columns
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
 
-        cal.set(2022, Calendar.DECEMBER, 15);
-        transactions.add(new Transaction("Mua sắm", -180000, cal.getTime(),
-                TransactionType.SHOPPING, R.drawable.ic_shopping));
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                // Assuming your column names and types match
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_ID));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_NOTE));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_AMOUNT));
+                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_DATE));
+                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_CATEGORY_ID));
 
-        cal.set(2022, Calendar.DECEMBER, 20);
-        transactions.add(new Transaction("Lương", 15000000, cal.getTime(),
-                TransactionType.INCOME, R.drawable.ic_salary));
+                // You'll need logic to fetch the category name and icon based on categoryId
+                // For now, we'll use a placeholder
+                String categoryName = "Default";
+                int categoryIcon = R.drawable.ic_category_default; // You need to have this drawable
+
+                TransactionType transactionType = (amount > 0) ? TransactionType.INCOME : TransactionType.EXPENSE;
+
+                // Create a Transaction object and add it to the list
+                transactions.add(new Transaction(description, amount, new Date(timestamp), transactionType, categoryIcon));
+
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        db.close();
 
         return transactions;
     }
 }
-
-// Transaction.java
-
-
-
