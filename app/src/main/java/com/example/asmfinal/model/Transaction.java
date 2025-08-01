@@ -3,36 +3,48 @@ package com.example.asmfinal.model;
 import java.util.Date;
 
 public class Transaction {
+    private int id;
     private String description;
     private double amount;
     private Date date;
-    private TransactionType type;
-    private int iconResId;
+    private String categoryName;
+    private int categoryIconResId;
 
-    public Transaction(String description, double amount, Date date, TransactionType type, int iconResId) {
+    public Transaction(int id, String description, double amount, Date date, String categoryName, int categoryIconResId) {
+        this.id = id;
         this.description = description;
         this.amount = amount;
         this.date = date;
-        this.type = type;
-        this.iconResId = iconResId;
+        this.categoryName = categoryName;
+        this.categoryIconResId = categoryIconResId;
     }
 
-    // Getters and setters
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    // Getters for all fields
+    public int getId() {
+        return id;
+    }
 
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
+    public String getDescription() {
+        return description;
+    }
 
-    public Date getDate() { return date; }
-    public void setDate(Date date) { this.date = date; }
+    public double getAmount() {
+        return amount;
+    }
 
-    public TransactionType getType() { return type; }
-    public void setType(TransactionType type) { this.type = type; }
+    public Date getDate() {
+        return date;
+    }
 
-    public int getIconResId() { return iconResId; }
-    public void setIconResId(int iconResId) { this.iconResId = iconResId; }
+    public String getCategoryName() {
+        return categoryName;
+    }
 
+    public int getCategoryIconResId() {
+        return categoryIconResId;
+    }
+
+    // Utility methods
     public boolean isIncome() {
         return amount > 0;
     }

@@ -6,22 +6,22 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.asmfinal.R;
 import com.example.asmfinal.model.Transaction;
-import com.example.asmfinal.adapter.TransactionAdapter;
 
 import java.text.DecimalFormat;
 import java.util.List;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
-    private List<Transaction> transactions;
+    private List<Transaction> transactionList;
     private DecimalFormat currencyFormat;
 
-    public TransactionAdapter(List<Transaction> transactions) {
-        this.transactions = transactions;
+    public TransactionAdapter(List<Transaction> transactionList) {
+        this.transactionList = transactionList;
         this.currencyFormat = new DecimalFormat("#,###");
     }
 
@@ -35,64 +35,57 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
-        Transaction transaction = transactions.get(position);
+        Transaction transaction = transactionList.get(position);
 
+        // Bind data from the Transaction object to the views
+        holder.tvCategoryName.setText(transaction.getCategoryName());
         holder.tvDescription.setText(transaction.getDescription());
-        holder.ivIcon.setImageResource(transaction.getIconResId());
 
-        // Format amount
-        String formattedAmount = (transaction.getAmount() >= 0 ? "" : "-") +
-                currencyFormat.format(Math.abs(transaction.getAmount())) + " VND";
+        double amount = transaction.getAmount();
+        String formattedAmount = currencyFormat.format(Math.abs(amount)) + " VND";
         holder.tvAmount.setText(formattedAmount);
 
-        // Set amount color
-        int colorRes = transaction.getAmount() >= 0 ?
-                R.color.green_positive : R.color.red_negative;
-        holder.tvAmount.setTextColor(holder.itemView.getContext().getResources().getColor(colorRes));
+        // Set amount color based on whether it's income or expense
+        if (amount < 0) {
+            holder.tvAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.red_negative));
+        } else {
+            holder.tvAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.green_positive));
+        }
 
-        // Set icon background color based on type
-        int backgroundRes = getIconBackground(transaction.getType());
-        holder.ivIcon.setBackgroundResource(backgroundRes);
+        // Set category icon
+        holder.ivCategoryIcon.setImageResource(transaction.getCategoryIconResId());
+
+        // Note: The icon background logic you had previously might need to be implemented
+        // in your DatabaseHelper or a separate helper class if your database stores
+        // this information. For now, we'll stick to a simple icon setting.
     }
 
     @Override
     public int getItemCount() {
-        return transactions.size();
+        return transactionList.size();
     }
 
-    private int getIconBackground(TransactionType type) {
-        switch (type) {
-            case INCOME:
-                return R.drawable.circle_yellow;
-            case TRANSPORT:
-                return R.drawable.circle_orange;
-            case UTILITIES:
-                return R.drawable.circle_green;
-            case FOOD:
-                return R.drawable.circle_red;
-            case SHOPPING:
-                return R.drawable.circle_purple;
-            case ENTERTAINMENT:
-                return R.drawable.circle_pink;
-            case HEALTHCARE:
-                return R.drawable.circle_blue;
-            default:
-                return R.drawable.circle_gray;
-        }
+    /**
+     * Updates the data in the adapter and notifies the RecyclerView.
+     */
+    public void updateData(List<Transaction> newData) {
+        this.transactionList.clear();
+        this.transactionList.addAll(newData);
+        notifyDataSetChanged();
     }
 
     static class TransactionViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivIcon;
+        ImageView ivCategoryIcon;
+        TextView tvCategoryName;
         TextView tvDescription;
         TextView tvAmount;
-        ImageView ivArrow;
 
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivIcon = itemView.findViewById(R.id.ivTransactionIcon);
-            tvDescription = itemView.findViewById(R.id.tvTransactionDescription);
-            tvAmount = itemView.findViewById(R.id.tvTransactionAmount);
-            ivArrow = itemView.findViewById(R.id.ivArrow);
+            ivCategoryIcon = itemView.findViewById(R.id.ivCategoryIcon);
+            tvCategoryName = itemView.findViewById(R.id.tvCategoryName);
+            tvDescription = itemView.findViewById(R.id.tvDescription);
+            tvAmount = itemView.findViewById(R.id.tvAmount);
         }
     }
 }

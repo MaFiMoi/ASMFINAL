@@ -1,6 +1,9 @@
 package com.example.asmfinal.Session;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -9,16 +12,14 @@ import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.asmfinal.DatabaseHelper;
+import com.example.asmfinal.database.DatabaseHelper;
 import com.example.asmfinal.R;
-import com.example.asmfinal.model.TransactionType;
+import com.example.asmfinal.model.Transaction;
+import com.example.asmfinal.adapter.TransactionAdapter;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,6 +33,7 @@ public class CalendarActivity extends AppCompatActivity {
     private GridLayout calendarGrid;
     private TextView tvCurrentMonth;
     private TextView tvTotalIncome, tvTotalExpense, tvTotal;
+    private TextView tvNoTransactions;
     private ImageButton btnPreviousMonth, btnNextMonth;
     private RecyclerView recyclerViewTransactions;
     private TransactionAdapter transactionAdapter;
@@ -41,8 +43,8 @@ public class CalendarActivity extends AppCompatActivity {
     private DecimalFormat currencyFormat;
     private SimpleDateFormat monthYearFormat;
 
-    // DatabaseHelper instance
     private DatabaseHelper databaseHelper;
+    private View lastSelectedDayView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +67,7 @@ public class CalendarActivity extends AppCompatActivity {
         btnPreviousMonth = findViewById(R.id.btnPreviousMonth);
         btnNextMonth = findViewById(R.id.btnNextMonth);
         recyclerViewTransactions = findViewById(R.id.recyclerViewTransactions);
+        tvNoTransactions = findViewById(R.id.tvNoTransactions);
 
         btnPreviousMonth.setOnClickListener(v -> {
             currentCalendar.add(Calendar.MONTH, -1);
@@ -78,19 +81,16 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        // Initialize DatabaseHelper
         databaseHelper = new DatabaseHelper(this);
-
         currentCalendar = Calendar.getInstance();
         currencyFormat = new DecimalFormat("#,###");
-        monthYearFormat = new SimpleDateFormat("'Month' MM 'Year' yyyy", Locale.US); // Using US locale for English format
-
+        monthYearFormat = new SimpleDateFormat("MMMM yyyy", new Locale("vi", "VN"));
         allTransactions = new ArrayList<>();
         selectedDayTransactions = new ArrayList<>();
     }
 
     private void setupCalendar() {
-        // Calendar is set up dynamically in updateCalendarDisplay()
+        // Not needed
     }
 
     private void setupRecyclerView() {
@@ -100,40 +100,30 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void updateCalendarDisplay() {
-        // Update month/year header
         tvCurrentMonth.setText(monthYearFormat.format(currentCalendar.getTime()));
-
-        // Clear existing calendar
         calendarGrid.removeAllViews();
 
-        // Load transactions from database for the current month
         allTransactions = getTransactionsForCurrentMonthFromDb();
 
-        // Reset selected day transactions
         selectedDayTransactions.clear();
         transactionAdapter.notifyDataSetChanged();
+        tvNoTransactions.setVisibility(View.VISIBLE);
 
-        // Calculate calendar data
         Calendar tempCal = (Calendar) currentCalendar.clone();
         tempCal.set(Calendar.DAY_OF_MONTH, 1);
-
         int firstDayOfWeek = tempCal.get(Calendar.DAY_OF_WEEK);
         int daysInMonth = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-        // Adjust for Monday start
         int startDay = (firstDayOfWeek == Calendar.SUNDAY) ? 6 : firstDayOfWeek - 2;
 
-        // Add empty cells for days before month starts
         for (int i = 0; i < startDay; i++) {
             addEmptyDayView();
         }
 
-        // Add days of the month
         for (int day = 1; day <= daysInMonth; day++) {
             addDayView(day);
         }
 
-        // Update monthly summary
         updateMonthlySummary();
     }
 
@@ -157,20 +147,18 @@ public class CalendarActivity extends AppCompatActivity {
 
         tvDay.setText(String.valueOf(day));
 
-        // Get transactions for this day
         List<Transaction> dayTransactions = getTransactionsForDay(day);
         double totalIncome = 0;
         double totalExpense = 0;
 
         for (Transaction transaction : dayTransactions) {
-            if (transaction.getAmount() > 0) {
+            if (transaction.getAmount() >= 0) {
                 totalIncome += transaction.getAmount();
             } else {
                 totalExpense += Math.abs(transaction.getAmount());
             }
         }
 
-        // Show indicators and amounts
         if (totalIncome > 0 || totalExpense > 0) {
             if (totalIncome > 0) {
                 indicatorIncome.setVisibility(View.VISIBLE);
@@ -178,25 +166,19 @@ public class CalendarActivity extends AppCompatActivity {
             if (totalExpense > 0) {
                 indicatorExpense.setVisibility(View.VISIBLE);
             }
-
-            // Show net amount
             double netAmount = totalIncome - totalExpense;
-            if (Math.abs(netAmount) >= 1000) { // Only show if significant amount
-                tvAmount.setText(formatCurrency(netAmount));
-                tvAmount.setVisibility(View.VISIBLE);
-                tvAmount.setTextColor(netAmount >= 0 ?
-                        getResources().getColor(R.color.green_positive) :
-                        getResources().getColor(R.color.red_negative));
-            }
+            tvAmount.setText(formatCurrency(netAmount));
+            tvAmount.setVisibility(View.VISIBLE);
+            tvAmount.setTextColor(netAmount >= 0 ?
+                    ContextCompat.getColor(this, R.color.green_positive) :
+                    ContextCompat.getColor(this, R.color.red_negative));
         }
 
-        // Handle day click
         dayView.setOnClickListener(v -> {
             showTransactionsForDay(day);
             highlightSelectedDay(dayView);
         });
 
-        // Set layout params
         GridLayout.LayoutParams params = new GridLayout.LayoutParams();
         params.width = 0;
         params.height = GridLayout.LayoutParams.WRAP_CONTENT;
@@ -226,19 +208,25 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void showTransactionsForDay(int day) {
-        selectedDayTransactions.clear();
-        selectedDayTransactions.addAll(getTransactionsForDay(day));
-        transactionAdapter.notifyDataSetChanged();
+        List<Transaction> transactionsForDay = getTransactionsForDay(day);
+        if (transactionsForDay.isEmpty()) {
+            tvNoTransactions.setVisibility(View.VISIBLE);
+            recyclerViewTransactions.setVisibility(View.GONE);
+        } else {
+            tvNoTransactions.setVisibility(View.GONE);
+            recyclerViewTransactions.setVisibility(View.VISIBLE);
+            selectedDayTransactions.clear();
+            selectedDayTransactions.addAll(transactionsForDay);
+            transactionAdapter.notifyDataSetChanged();
+        }
     }
 
     private void highlightSelectedDay(View selectedDayView) {
-        // Remove highlight from all days
-        for (int i = 0; i < calendarGrid.getChildCount(); i++) {
-            View child = calendarGrid.getChildAt(i);
-            child.setSelected(false);
+        if (lastSelectedDayView != null) {
+            lastSelectedDayView.setBackgroundResource(android.R.color.transparent);
         }
-        // Highlight selected day
-        selectedDayView.setSelected(true);
+        selectedDayView.setBackgroundResource(R.drawable.calendar_day_selected_background);
+        lastSelectedDayView = selectedDayView;
     }
 
     private void updateMonthlySummary() {
@@ -246,7 +234,7 @@ public class CalendarActivity extends AppCompatActivity {
         double totalExpense = 0;
 
         for (Transaction transaction : allTransactions) {
-            if (transaction.getAmount() > 0) {
+            if (transaction.getAmount() >= 0) {
                 totalIncome += transaction.getAmount();
             } else {
                 totalExpense += Math.abs(transaction.getAmount());
@@ -259,26 +247,21 @@ public class CalendarActivity extends AppCompatActivity {
         tvTotalExpense.setText("-" + formatCurrency(totalExpense) + " VND");
         tvTotal.setText(formatCurrency(netTotal) + " VND");
 
-        // Set colors
-        tvTotalIncome.setTextColor(getResources().getColor(R.color.green_positive));
-        tvTotalExpense.setTextColor(getResources().getColor(R.color.red_negative));
+        tvTotalIncome.setTextColor(ContextCompat.getColor(this, R.color.green_positive));
+        tvTotalExpense.setTextColor(ContextCompat.getColor(this, R.color.red_negative));
         tvTotal.setTextColor(netTotal >= 0 ?
-                getResources().getColor(R.color.green_positive) :
-                getResources().getColor(R.color.red_negative));
+                ContextCompat.getColor(this, R.color.green_positive) :
+                ContextCompat.getColor(this, R.color.red_negative));
     }
 
     private String formatCurrency(double amount) {
         return currencyFormat.format(Math.abs(amount));
     }
 
-    /**
-     * Method to fetch all transactions for the current month from the database.
-     */
     private List<Transaction> getTransactionsForCurrentMonthFromDb() {
         List<Transaction> transactions = new ArrayList<>();
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
-        // Get the start and end of the current month
         Calendar monthStart = (Calendar) currentCalendar.clone();
         monthStart.set(Calendar.DAY_OF_MONTH, 1);
         monthStart.set(Calendar.HOUR_OF_DAY, 0);
@@ -289,48 +272,47 @@ public class CalendarActivity extends AppCompatActivity {
         monthEnd.add(Calendar.MONTH, 1);
         monthEnd.add(Calendar.SECOND, -1);
 
-        SimpleDateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+        String monthStartString = dbDateFormat.format(monthStart.getTime());
+        String monthEndString = dbDateFormat.format(monthEnd.getTime());
 
-        String selection = DatabaseHelper.COLUMN_TRANSACTION_DATE + " BETWEEN ? AND ?";
-        String[] selectionArgs = {
-                dbDateFormat.format(monthStart.getTime()),
-                dbDateFormat.format(monthEnd.getTime())
-        };
+        // Sử dụng tên bảng và cột từ DatabaseHelper gốc của bạn
+        String query = "SELECT " +
+                "T." + DatabaseHelper.COLUMN_EXPENSE_ID + ", " +
+                "T." + DatabaseHelper.COLUMN_TITLE + ", " +
+                "T." + DatabaseHelper.COLUMN_AMOUNT + ", " +
+                "T." + DatabaseHelper.COLUMN_DATE + ", " +
+                "T." + DatabaseHelper.COLUMN_CATEGORY +
+                " FROM " + DatabaseHelper.TABLE_EXPENSE + " T" +
+                " WHERE " + "T." + DatabaseHelper.COLUMN_DATE + " BETWEEN ? AND ?";
 
-        Cursor cursor = db.query(
-                DatabaseHelper.TABLE_EXPENSES,
-                null, // Get all columns
-                selection,
-                selectionArgs,
-                null,
-                null,
-                null
-        );
+        Cursor cursor = db.rawQuery(query, new String[]{monthStartString, monthEndString});
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                // Assuming your column names and types match
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_ID));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_NOTE));
-                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_AMOUNT));
-                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_DATE));
-                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPENSE_CATEGORY_ID));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TITLE));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_AMOUNT));
+                String dateString = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DATE));
+                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CATEGORY));
+                // Bạn có thể cần thêm logic để lấy icon dựa trên categoryName
+                int categoryIcon = R.drawable.ic_category_default; // Giả sử một icon mặc định
 
-                // You'll need logic to fetch the category name and icon based on categoryId
-                // For now, we'll use a placeholder
-                String categoryName = "Default";
-                int categoryIcon = R.drawable.ic_category_default; // You need to have this drawable
+                Date transactionDate = null;
+                try {
+                    transactionDate = dbDateFormat.parse(dateString);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
-                TransactionType transactionType = (amount > 0) ? TransactionType.INCOME : TransactionType.EXPENSE;
-
-                // Create a Transaction object and add it to the list
-                transactions.add(new Transaction(description, amount, new Date(timestamp), transactionType, categoryIcon));
+                if (transactionDate != null) {
+                    transactions.add(new Transaction(id, description, amount, transactionDate, categoryName, categoryIcon));
+                }
 
             } while (cursor.moveToNext());
             cursor.close();
         }
         db.close();
-
         return transactions;
     }
 }
