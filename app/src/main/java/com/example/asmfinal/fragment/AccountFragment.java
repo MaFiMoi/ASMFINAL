@@ -70,18 +70,9 @@ public class AccountFragment extends Fragment {
             });
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Áp dụng Dark Mode ở đây hoặc trong Activity chứa Fragment
-    }
-
-    @Nullable
-    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate layout cho Fragment này
-        // Đã sửa để sử dụng layout fragment_account
-        View view = inflater.inflate(R.layout.fragment_account, container, false);
-        return view;
+        return inflater.inflate(R.layout.fragment_account, container, false);
     }
 
     @Override
@@ -132,60 +123,52 @@ public class AccountFragment extends Fragment {
      * Thiết lập các sự kiện click và thay đổi trạng thái cho các thành phần UI.
      */
     private void setupListeners() {
-        menuAccount.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Bạn đã click Tài khoản", Toast.LENGTH_SHORT).show();
-            // TODO: Mở màn hình chi tiết tài khoản
-        });
+        // Kiểm tra null trước khi gán listener để tránh NullPointerException
+        if (menuAccount != null) {
+            menuAccount.setOnClickListener(v -> Toast.makeText(requireContext(), "Bạn đã click Tài khoản", Toast.LENGTH_SHORT).show());
+        }
+        if (menuChangePassword != null) {
+            menuChangePassword.setOnClickListener(v -> Toast.makeText(requireContext(), "Bạn đã click Đổi Mật khẩu", Toast.LENGTH_SHORT).show());
+        }
+        if (menuLanguage != null) {
+            menuLanguage.setOnClickListener(v -> Toast.makeText(requireContext(), "Bạn đã click Ngôn ngữ", Toast.LENGTH_SHORT).show());
+        }
+        if (menuExportCSV != null) {
+            menuExportCSV.setOnClickListener(v -> Toast.makeText(requireContext(), "Bạn đã click Xuất CSV", Toast.LENGTH_SHORT).show());
+        }
+        if (menuHistory != null) {
+            menuHistory.setOnClickListener(v -> Toast.makeText(requireContext(), "Bạn đã click Lịch sử", Toast.LENGTH_SHORT).show());
+        }
+        if (menuExchangeRate != null) {
+            menuExchangeRate.setOnClickListener(v -> Toast.makeText(requireContext(), "Bạn đã click Tỷ giá tiền tệ", Toast.LENGTH_SHORT).show());
+        }
 
-        menuChangePassword.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Bạn đã click Đổi Mật khẩu", Toast.LENGTH_SHORT).show();
-            // TODO: Mở màn hình đổi mật khẩu
-        });
+        if (switchDarkMode != null) {
+            switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                SharedPreferences.Editor editor = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
+                editor.putBoolean(KEY_DARK_MODE, isChecked);
+                editor.apply();
 
-        menuLanguage.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Bạn đã click Ngôn ngữ", Toast.LENGTH_SHORT).show();
-            // TODO: Hiển thị dialog chọn ngôn ngữ
-        });
+                if (isChecked) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    Toast.makeText(requireContext(), "Chế độ Tối đã bật", Toast.LENGTH_SHORT).show();
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    Toast.makeText(requireContext(), "Chế độ Tối đã tắt", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
-        menuExportCSV.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Bạn đã click Xuất CSV", Toast.LENGTH_SHORT).show();
-            // TODO: Xử lý logic xuất file CSV
-        });
+        if (btnLogin != null) {
+            btnLogin.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), LoginActivity.class);
+                loginLauncher.launch(intent);
+            });
+        }
 
-        menuHistory.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Bạn đã click Lịch sử", Toast.LENGTH_SHORT).show();
-            // TODO: Mở màn hình lịch sử
-        });
-
-        menuExchangeRate.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Bạn đã click Tỷ giá tiền tệ", Toast.LENGTH_SHORT).show();
-            // TODO: Mở màn hình tỷ giá tiền tệ
-        });
-
-        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
-            editor.putBoolean(KEY_DARK_MODE, isChecked);
-            editor.apply();
-
-            // Set chế độ tối cho ứng dụng
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                Toast.makeText(requireContext(), "Chế độ Tối đã bật", Toast.LENGTH_SHORT).show();
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                Toast.makeText(requireContext(), "Chế độ Tối đã tắt", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        btnLogin.setOnClickListener(v -> {
-            // Mở màn hình đăng nhập
-            Intent intent = new Intent(requireContext(), LoginActivity.class);
-            loginLauncher.launch(intent);
-        });
-
-        btnLogout.setOnClickListener(v -> {
-            logoutUser();
-        });
+        if (btnLogout != null) {
+            btnLogout.setOnClickListener(v -> logoutUser());
+        }
     }
 
     /**
@@ -197,30 +180,34 @@ public class AccountFragment extends Fragment {
 
         // Cập nhật trạng thái của Dark Mode Switch
         boolean isDarkModeEnabled = prefs.getBoolean(KEY_DARK_MODE, false);
-        switchDarkMode.setChecked(isDarkModeEnabled);
+        if (switchDarkMode != null) {
+            switchDarkMode.setChecked(isDarkModeEnabled);
+        }
 
         if (loggedInEmail != null) {
             // Đã đăng nhập
             User currentUser = databaseHelper.getUserByEmail(loggedInEmail);
             if (currentUser != null) {
-                tvUserName.setText(currentUser.getFullName());
+                if (tvUserName != null) {
+                    tvUserName.setText(currentUser.getFullName());
+                }
 
-                profileSection.setVisibility(View.VISIBLE);
-                noDataContainer.setVisibility(View.GONE);
-                btnLogout.setVisibility(View.VISIBLE);
-                btnLogin.setVisibility(View.GONE); // Ẩn nút đăng nhập
+                if (profileSection != null) profileSection.setVisibility(View.VISIBLE);
+                if (noDataContainer != null) noDataContainer.setVisibility(View.GONE);
+                if (btnLogout != null) btnLogout.setVisibility(View.VISIBLE);
+                if (btnLogin != null) btnLogin.setVisibility(View.GONE);
             } else {
                 // Trường hợp người dùng không còn tồn tại trong DB, tự động đăng xuất
                 logoutUser();
             }
         } else {
             // Chưa đăng nhập
-            tvUserName.setText("");
+            if (tvUserName != null) tvUserName.setText("");
 
-            profileSection.setVisibility(View.GONE);
-            noDataContainer.setVisibility(View.VISIBLE);
-            btnLogout.setVisibility(View.GONE);
-            btnLogin.setVisibility(View.VISIBLE); // Hiển thị nút đăng nhập
+            if (profileSection != null) profileSection.setVisibility(View.GONE);
+            if (noDataContainer != null) noDataContainer.setVisibility(View.VISIBLE);
+            if (btnLogout != null) btnLogout.setVisibility(View.GONE);
+            if (btnLogin != null) btnLogin.setVisibility(View.VISIBLE);
         }
     }
 

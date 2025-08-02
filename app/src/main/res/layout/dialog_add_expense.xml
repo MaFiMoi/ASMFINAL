@@ -11,15 +11,34 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/edtTitle"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingBottom="12dp"
-            android:text="Thêm Chi Tiêu"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:id="@+id/edtTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Thêm Chi Tiêu"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/ivDelete"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_delete"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Xóa chi tiêu" />
+
+        </RelativeLayout>
 
         <EditText
             android:id="@+id/etAmount"
@@ -44,7 +63,6 @@
             android:elevation="2dp"
             android:layout_marginBottom="16dp">
 
-            <!-- Spinner chọn danh mục -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -71,7 +89,6 @@
                     android:src="@android:drawable/ic_media_next" />
             </LinearLayout>
 
-            <!-- Chọn ngày -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -104,7 +121,6 @@
                     android:src="@android:drawable/ic_media_next" />
             </LinearLayout>
 
-            <!-- Chọn giờ -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -137,7 +153,6 @@
                     android:src="@android:drawable/ic_media_next" />
             </LinearLayout>
 
-            <!-- Ghi chú -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -163,7 +178,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Nút Thoát và Lưu -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

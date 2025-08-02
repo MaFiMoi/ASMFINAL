@@ -250,7 +250,7 @@ public class CalendarActivity extends AppCompatActivity {
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 int idIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_EXPENSE_ID);
-                int descriptionIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_TITLE);
+                int descriptionIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_DESCRIPTION);
                 int amountIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_AMOUNT);
                 int dateIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_DATE);
                 int categoryIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY);

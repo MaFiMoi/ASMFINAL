@@ -7,6 +7,7 @@
     android:background="#F5F5F5"
     tools:context=".fragment.CalendarFragment">
 
+    <!-- Header -->
     <LinearLayout
         android:id="@+id/calendarHeader"
         android:layout_width="match_parent"
@@ -23,8 +24,8 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Previous month"
             android:src="@drawable/ic_arrow_left"
+            android:contentDescription="Previous"
             app:tint="@android:color/white" />
 
         <TextView
@@ -33,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Tháng Năm"
+            android:text="Tháng 8 2025"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -43,36 +44,47 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Next month"
             android:src="@drawable/ic_arrow_right"
+            android:contentDescription="Next"
             app:tint="@android:color/white" />
-
     </LinearLayout>
 
+    <!-- Day of Week Labels -->
     <LinearLayout
         android:id="@+id/daysOfWeekHeader"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:layout_below="@id/calendarHeader"
         android:background="@android:color/white"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:elevation="2dp">
 
-        <!-- Các ngày trong tuần -->
-        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Th 2" android:textColor="#666666" android:textSize="12sp" />
-        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Th 3" android:textColor="#666666" android:textSize="12sp" />
-        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Th 4" android:textColor="#666666" android:textSize="12sp" />
-        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Th 5" android:textColor="#666666" android:textSize="12sp" />
-        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="Th 6" android:textColor="#666666" android:textSize="12sp" />
-        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="T 7" android:textColor="#FF5722" android:textSize="12sp" />
-        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="CN" android:textColor="#FF5722" android:textSize="12sp" />
+        <!-- 7 ngày trong tuần -->
+        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:gravity="center" android:text="Th 2" android:textColor="#666" android:textSize="13sp" android:textStyle="bold"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:gravity="center" android:text="Th 3" android:textColor="#666" android:textSize="13sp" android:textStyle="bold"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:gravity="center" android:text="Th 4" android:textColor="#666" android:textSize="13sp" android:textStyle="bold"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:gravity="center" android:text="Th 5" android:textColor="#666" android:textSize="13sp" android:textStyle="bold"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:gravity="center" android:text="Th 6" android:textColor="#666" android:textSize="13sp" android:textStyle="bold"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:gravity="center" android:text="T 7" android:textColor="#FF5722" android:textSize="13sp" android:textStyle="bold"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:gravity="center" android:text="CN" android:textColor="#FF5722" android:textSize="13sp" android:textStyle="bold"/>
     </LinearLayout>
 
-    <ScrollView
+    <!-- Calendar Grid -->
+    <LinearLayout
+        android:id="@+id/calendarContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/daysOfWeekHeader"
-        android:layout_above="@id/summaryCard"
-        android:background="@android:color/white">
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:padding="4dp">
 
         <GridLayout
             android:id="@+id/calendarGrid"
@@ -80,80 +92,119 @@
             android:layout_height="wrap_content"
             android:columnCount="7"
             android:rowCount="6"
-            android:padding="8dp" />
+            android:alignmentMode="alignMargins"
+            android:useDefaultMargins="true"
+            android:padding="2dp"
+            android:layout_gravity="center"/>
+    </LinearLayout>
 
-    </ScrollView>
+    <!-- Divider -->
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/calendarContainer"
+        android:background="#E0E0E0" />
 
+    <!-- Summary Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/summaryCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/transactionContainer"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="8dp"
+        android:layout_below="@id/divider"
+        android:layout_margin="16dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp">
 
+        <!-- Nội dung thu/chi -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:padding="20dp">
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Thu Nhập" android:textColor="#666666" android:textSize="12sp" />
-                <TextView android:id="@+id/tvTotalIncome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 VND" android:textColor="#4CAF50" android:textSize="14sp" android:textStyle="bold" />
+            <!-- Income -->
+            <LinearLayout
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                <TextView android:text="Thu Nhập" android:textSize="13sp" android:textStyle="bold"
+                    android:textColor="#666666" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvTotalIncome" android:text="0 VND" android:textSize="16sp"
+                    android:textStyle="bold" android:textColor="#4CAF50" android:layout_marginTop="4dp"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
             </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chi Tiêu" android:textColor="#666666" android:textSize="12sp" />
-                <TextView android:id="@+id/tvTotalExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 VND" android:textColor="#F44336" android:textSize="14sp" android:textStyle="bold" />
+            <!-- Divider -->
+            <View android:layout_width="1dp" android:layout_height="match_parent" android:background="#E0E0E0"
+                android:layout_marginHorizontal="8dp"/>
+
+            <!-- Expense -->
+            <LinearLayout
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                <TextView android:text="Chi Tiêu" android:textSize="13sp" android:textStyle="bold"
+                    android:textColor="#666666" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvTotalExpense" android:text="0 VND" android:textSize="16sp"
+                    android:textStyle="bold" android:textColor="#F44336" android:layout_marginTop="4dp"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
             </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tổng" android:textColor="#666666" android:textSize="12sp" />
-                <TextView android:id="@+id/tvTotal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 VND" android:textColor="#4CAF50" android:textSize="14sp" android:textStyle="bold" />
-            </LinearLayout>
+            <!-- Divider -->
+            <View android:layout_width="1dp" android:layout_height="match_parent" android:background="#E0E0E0"
+                android:layout_marginHorizontal="8dp"/>
 
+            <!-- Tổng -->
+            <LinearLayout
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                <TextView android:text="Tổng" android:textSize="13sp" android:textStyle="bold"
+                    android:textColor="#666666" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvTotal" android:text="0 VND" android:textSize="16sp"
+                    android:textStyle="bold" android:textColor="#4CAF50" android:layout_marginTop="4dp"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Transaction List -->
     <RelativeLayout
         android:id="@+id/transactionContainer"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/summaryCard"
         android:layout_above="@+id/fabAdd"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="16dp">
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:minHeight="100dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewTransactions"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            tools:listitem="@layout/item_transaction" />
+            android:clipToPadding="false"
+            android:padding="8dp" />
 
         <TextView
             android:id="@+id/tvNoTransactions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Không có giao dịch nào cho ngày này"
+            android:text="Không có giao dịch nào"
             android:textColor="#999999"
+            android:textSize="14sp"
             android:visibility="gone" />
     </RelativeLayout>
 
+    <!-- FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:backgroundTint="#4CAF50"
         android:src="@drawable/ic_add"
-        app:tint="@android:color/white" />
-
+        app:tint="@android:color/white"
+        android:elevation="6dp" />
 </RelativeLayout>
